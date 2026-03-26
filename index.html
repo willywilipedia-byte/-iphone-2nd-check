@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iCheck — iPhone Second Checklist</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a24;
+    --border: #2a2a3a;
+    --accent: #7DF9C0;
+    --accent2: #4FC3F7;
+    --danger: #FF6B6B;
+    --warn: #FFD166;
+    --text: #F0F0F8;
+    --muted: #6b6b8a;
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
+
+  /* BG texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 40% at 20% 0%, rgba(125,249,192,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 100%, rgba(79,195,247,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap { max-width: 680px; margin: 0 auto; padding: 0 16px; position: relative; z-index: 1; }
+
+  /* HEADER */
+  header {
+    padding: 36px 16px 0;
+    max-width: 680px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    letter-spacing: -1px;
+  }
+
+  .logo span { color: var(--accent); }
+
+  .lang-toggle {
+    display: flex;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 3px;
+    gap: 2px;
+  }
+
+  .lang-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 5px 12px;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+
+  .lang-btn.active {
+    background: var(--accent);
+    color: #0a0a0f;
+    font-weight: 500;
+  }
+
+  .header-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 28px;
+    font-weight: 300;
+  }
+
+  /* PROGRESS */
+  .progress-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+  }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .progress-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .progress-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--accent);
+  }
+
+  .progress-count span { color: var(--muted); font-size: 14px; }
+
+  .progress-bar-wrap {
+    background: var(--surface2);
+    border-radius: 100px;
+    height: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0%;
+  }
+
+  .progress-phases {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .phase-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+  }
+
+  .phase-pill.done { border-color: var(--accent); color: var(--accent); }
+  .phase-pill.active { border-color: var(--accent2); color: var(--accent2); background: rgba(79,195,247,0.08); }
+
+  /* PHASES */
+  .phase {
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--surface);
+    transition: border-color 0.3s;
+  }
+
+  .phase.phase-complete { border-color: rgba(125,249,192,0.3); }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 20px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.2s;
+  }
+
+  .phase-header:hover { background: rgba(255,255,255,0.02); }
+
+  .phase-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .phase.phase-complete .phase-num {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0a0a0f;
+  }
+
+  .phase-title-wrap { flex: 1; }
+
+  .phase-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 2px;
+  }
+
+  .phase-meta {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .phase-chevron {
+    color: var(--muted);
+    transition: transform 0.3s;
+    font-size: 14px;
+  }
+
+  .phase.open .phase-chevron { transform: rotate(180deg); }
+
+  .phase-body {
+    display: none;
+    border-top: 1px solid var(--border);
+  }
+
+  .phase.open .phase-body { display: block; }
+
+  /* CHECK ITEMS */
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+  }
+
+  .check-item:last-child { border-bottom: none; }
+  .check-item:hover { background: rgba(255,255,255,0.02); }
+  .check-item.checked { opacity: 0.6; }
+
+  .check-box {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all 0.2s;
+    background: transparent;
+  }
+
+  .check-item.checked .check-box {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .check-icon {
+    opacity: 0;
+    font-size: 11px;
+    transition: opacity 0.2s;
+    color: #0a0a0f;
+  }
+
+  .check-item.checked .check-icon { opacity: 1; }
+
+  .check-content { flex: 1; }
+
+  .check-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 3px;
+    transition: text-decoration 0.2s;
+  }
+
+  .check-item.checked .check-title { text-decoration: line-through; color: var(--muted); }
+
+  .check-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+    font-weight: 300;
+  }
+
+  .check-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    border: 1px solid;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .tag-critical { border-color: rgba(255,107,107,0.5); color: var(--danger); background: rgba(255,107,107,0.08); }
+  .tag-warn { border-color: rgba(255,209,102,0.5); color: var(--warn); background: rgba(255,209,102,0.08); }
+  .tag-info { border-color: rgba(79,195,247,0.5); color: var(--accent2); background: rgba(79,195,247,0.08); }
+
+  /* IMEI LINKS SECTION */
+  .imei-section {
+    background: var(--surface2);
+    border-top: 1px solid var(--border);
+    padding: 16px 20px;
+  }
+
+  .imei-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .imei-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .imei-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 12px;
+    text-decoration: none;
+    color: var(--accent2);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    transition: all 0.2s;
+  }
+
+  .imei-link:hover {
+    border-color: var(--accent2);
+    background: rgba(79,195,247,0.06);
+  }
+
+  /* VERDICT */
+  .verdict-card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+    background: var(--surface);
+    display: none;
+  }
+
+  .verdict-card.show { display: block; }
+
+  .verdict-emoji { font-size: 40px; margin-bottom: 12px; }
+
+  .verdict-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    margin-bottom: 8px;
+  }
+
+  .verdict-desc {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .verdict-layak { border-color: rgba(125,249,192,0.4); }
+  .verdict-layak .verdict-title { color: var(--accent); }
+
+  .verdict-hati { border-color: rgba(255,209,102,0.4); }
+  .verdict-hati .verdict-title { color: var(--warn); }
+
+  .verdict-tolak { border-color: rgba(255,107,107,0.4); }
+  .verdict-tolak .verdict-title { color: var(--danger); }
+
+  /* BUTTONS */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 20px;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .btn-wa {
+    background: #25D366;
+    color: #fff;
+  }
+
+  .btn-wa:hover { background: #20bc5a; transform: translateY(-1px); }
+
+  .btn-reset {
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+
+  .btn-reset:hover { color: var(--text); border-color: var(--muted); }
+
+  .btn-copy {
+    background: var(--surface2);
+    color: var(--accent2);
+    border: 1px solid rgba(79,195,247,0.3);
+  }
+
+  .btn-copy:hover { background: rgba(79,195,247,0.08); }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 32px 16px 0;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .phase { animation: fadeSlide 0.3s ease both; }
+  .phase:nth-child(1) { animation-delay: 0.05s; }
+  .phase:nth-child(2) { animation-delay: 0.1s; }
+  .phase:nth-child(3) { animation-delay: 0.15s; }
+  .phase:nth-child(4) { animation-delay: 0.2s; }
+
+  @keyframes checkPop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+  }
+
+  .check-item.just-checked .check-box { animation: checkPop 0.25s ease; }
+
+  /* MOBILE */
+  @media (max-width: 480px) {
+    .logo { font-size: 22px; }
+    .phase-title { font-size: 14px; }
+    .btn-row { flex-direction: column; }
+    .btn { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="logo">i<span>Check</span></div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('id')" id="btn-id">ID</button>
+      <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
+    </div>
+  </div>
+  <div class="header-sub" id="header-sub">Panduan lengkap beli iPhone second. Jangan deal sebelum semua lolos.</div>
+</header>
+
+<div class="wrap">
+
+  <!-- PROGRESS -->
+  <div class="progress-card">
+    <div class="progress-header">
+      <div class="progress-label" id="prog-label">Progress</div>
+      <div class="progress-count"><span id="checked-count">0</span><span> / <span id="total-count">0</span></span></div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill"></div>
+    </div>
+    <div class="progress-phases">
+      <div class="phase-pill" id="pill-0" data-id-text="Sebelum Ketemu" data-en-text="Before Meeting">Sebelum Ketemu</div>
+      <div class="phase-pill" id="pill-1" data-id-text="Saat COD" data-en-text="At COD">Saat COD</div>
+      <div class="phase-pill" id="pill-2" data-id-text="Hardware" data-en-text="Hardware">Hardware</div>
+      <div class="phase-pill" id="pill-3" data-id-text="Deal" data-en-text="Deal">Deal</div>
+    </div>
+  </div>
+
+  <!-- VERDICT -->
+  <div class="verdict-card" id="verdict-card">
+    <div class="verdict-emoji" id="verdict-emoji">✅</div>
+    <div class="verdict-title" id="verdict-title">Layak Beli</div>
+    <div class="verdict-desc" id="verdict-desc">Semua poin kritis telah dicek. iPhone ini tampak aman untuk dibeli.</div>
+    <div class="btn-row">
+      <button class="btn btn-wa" onclick="shareWA()" id="btn-wa">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        <span id="btn-wa-text">Share ke WhatsApp</span>
+      </button>
+      <button class="btn btn-copy" onclick="copyResult()" id="btn-copy-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        <span id="btn-copy-text">Copy Hasil</span>
+      </button>
+      <button class="btn btn-reset" onclick="resetAll()" id="btn-reset-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+        <span id="btn-reset-text">Reset</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- PHASES CONTAINER -->
+  <div id="phases-container"></div>
+
+  <div class="footer">
+    <p id="footer-text">iCheck — dibuat untuk membantu kamu beli iPhone second dengan aman.</p>
+  </div>
+</div>
+
+<script>
+const lang = { current: 'id' };
+
+const translations = {
+  headerSub: {
+    id: 'Panduan lengkap beli iPhone second. Jangan deal sebelum semua lolos.',
+    en: 'Complete guide to buying a used iPhone. Don\'t deal until everything passes.'
+  },
+  progLabel: { id: 'Progress', en: 'Progress' },
+  verdictLayakTitle: { id: 'Layak Beli ✅', en: 'Worth Buying ✅' },
+  verdictLayakDesc: { id: 'Semua poin kritis telah dicek. iPhone ini tampak aman untuk dibeli.', en: 'All critical points checked. This iPhone appears safe to purchase.' },
+  verdictHatiTitle: { id: 'Hati-Hati ⚠️', en: 'Proceed with Caution ⚠️' },
+  verdictHatiDesc: { id: 'Belum semua poin dicek. Pastikan semua item selesai sebelum membayar.', en: 'Not all points checked yet. Make sure everything is verified before paying.' },
+  verdictTolakTitle: { id: 'Jangan Dibeli 🚫', en: 'Do Not Buy 🚫' },
+  verdictTolakDesc: { id: 'Ada poin kritis yang gagal atau dilewati. Tolak transaksi ini.', en: 'Critical points failed or skipped. Reject this transaction.' },
+  waText: { id: 'Share ke WhatsApp', en: 'Share to WhatsApp' },
+  copyText: { id: 'Copy Hasil', en: 'Copy Result' },
+  resetText: { id: 'Reset', en: 'Reset' },
+  footerText: { id: 'iCheck — dibuat untuk membantu kamu beli iPhone second dengan aman.', en: 'iCheck — made to help you buy used iPhones safely.' },
+  imeiLabel: { id: '🔗 CEK IMEI ONLINE', en: '🔗 CHECK IMEI ONLINE' },
+};
+
+const phases = [
+  {
+    id: 0,
+    title: { id: 'Fase 1 — Sebelum Bertemu', en: 'Phase 1 — Before Meeting' },
+    items: [
+      {
+        id: 'p0_imei',
+        title: { id: 'Minta foto IMEI dari penjual', en: 'Request IMEI photo from seller' },
+        desc: { id: 'Minta screenshot hasil *#06# atau foto IMEI di body/dus.', en: 'Request screenshot of *#06# or photo of IMEI on body/box.' },
+        tag: 'critical'
+      },
+      {
+        id: 'p0_kemenperin',
+        title: { id: 'Cek IMEI di Kemenperin', en: 'Check IMEI on Kemenperin' },
+        desc: { id: 'Pastikan terdaftar di imei.kemenperin.go.id. Jika tidak, bisa diblokir pemerintah.', en: 'Verify registration at imei.kemenperin.go.id. If not listed, it can be blocked.' },
+        tag: 'critical',
+        hasLinks: true
+      },
+      {
+        id: 'p0_blacklist',
+        title: { id: 'Cek status blacklist IMEI', en: 'Check IMEI blacklist status' },
+        desc: { id: 'Gunakan imei.info atau imeipro.info — pastikan tidak masuk daftar stolen/lost.', en: 'Use imei.info or imeipro.info — ensure it\'s not listed as stolen/lost.' },
+        tag: 'critical',
+        hasLinks: true
+      },
+      {
+        id: 'p0_coverage',
+        title: { id: 'Cek di Apple Coverage', en: 'Check Apple Coverage' },
+        desc: { id: 'Buka checkcoverage.apple.com — cek status garansi dan aktivasi Apple.', en: 'Visit checkcoverage.apple.com — verify warranty and Apple activation status.' },
+        tag: 'info',
+        hasLinks: true
+      },
+      {
+        id: 'p0_harga',
+        title: { id: 'Bandingkan harga pasaran', en: 'Compare market price' },
+        desc: { id: 'Cek di Tokopedia atau iBox second. Harga terlalu murah = red flag.', en: 'Check Tokopedia or iBox second. Price too low = red flag.' },
+        tag: 'warn'
+      },
+    ]
+  },
+  {
+    id: 1,
+    title: { id: 'Fase 2 — Saat COD (Cek Identitas)', en: 'Phase 2 — At COD (Identity Check)' },
+    items: [
+      {
+        id: 'p1_regional',
+        title: { id: 'Cek kode regional', en: 'Check regional code' },
+        desc: { id: 'Pengaturan → Umum → Tentang → Nomor Model. Tap sekali agar kode lengkap muncul. PA/A (iBox), ID/A (Telkomsel), FE/A (Indosat) = aman.', en: 'Settings → General → About → Model Number. Tap once to see full code. PA/A (iBox), ID/A (Telkomsel), FE/A (Indosat) = safe.' },
+        tag: 'warn'
+      },
+      {
+        id: 'p1_imei_match',
+        title: { id: 'Cocokkan IMEI fisik vs digital', en: 'Match physical IMEI vs digital' },
+        desc: { id: 'Dial *#06# → bandingkan dengan IMEI di body belakang, SIM tray, dan dus. Ketiganya harus sama persis.', en: 'Dial *#06# → compare with IMEI on back, SIM tray, and box. All three must match exactly.' },
+        tag: 'critical'
+      },
+      {
+        id: 'p1_unit_type',
+        title: { id: 'Cek tipe unit (M/F/N)', en: 'Check unit type (M/F/N)' },
+        desc: { id: 'Huruf pertama kode model: M = retail baru ✅, F = refurbished Apple, N = replacement Apple.', en: 'First letter of model code: M = new retail ✅, F = Apple refurbished, N = Apple replacement.' },
+        tag: 'info'
+      },
+      {
+        id: 'p1_forwarding',
+        title: { id: 'Cek call forwarding', en: 'Check call forwarding' },
+        desc: { id: 'Dial *#21#, *#61#, *#67# satu per satu. Harus menampilkan "Not Forwarded". Nomor asing = red flag.', en: 'Dial *#21#, *#61#, *#67# one by one. Should show "Not Forwarded". Unknown number = red flag.' },
+        tag: 'warn'
+      },
+    ]
+  },
+  {
+    id: 2,
+    title: { id: 'Fase 3 — Cek Hardware & Software', en: 'Phase 3 — Hardware & Software Check' },
+    items: [
+      {
+        id: 'p2_komponen',
+        title: { id: 'Cek notifikasi komponen non-original', en: 'Check non-original component alerts' },
+        desc: { id: 'Pengaturan → Umum → Tentang. Scroll bawah. Cek notifikasi untuk layar, kamera, dan Face ID. Pesan "tidak dapat memverifikasi" = komponen diganti.', en: 'Settings → General → About. Scroll down. Check alerts for display, camera, Face ID. "Cannot verify" message = replaced component.' },
+        tag: 'critical'
+      },
+      {
+        id: 'p2_baterai',
+        title: { id: 'Cek kesehatan baterai (min. 80%)', en: 'Check battery health (min. 80%)' },
+        desc: { id: 'Pengaturan → Baterai → Kesehatan & Pengisian Daya. Di bawah 80% = perlu ganti baterai (Rp500rb–1,5jt).', en: 'Settings → Battery → Battery Health & Charging. Below 80% = battery replacement needed.' },
+        tag: 'warn'
+      },
+      {
+        id: 'p2_layar',
+        title: { id: 'Test layar & dead pixel', en: 'Test display & dead pixels' },
+        desc: { id: 'Cek warna, brightness, burn-in, dan dead pixel. Buka foto putih polos untuk cek lebih mudah.', en: 'Check colors, brightness, burn-in, and dead pixels. Open a plain white photo for easier detection.' },
+        tag: 'warn'
+      },
+      {
+        id: 'p2_tombol',
+        title: { id: 'Test semua tombol fisik', en: 'Test all physical buttons' },
+        desc: { id: 'Volume atas/bawah, silent switch, power button — semua harus responsif dan tidak seret.', en: 'Volume up/down, silent switch, power button — all must be responsive and not stiff.' },
+        tag: 'info'
+      },
+      {
+        id: 'p2_faceid',
+        title: { id: 'Test Face ID / Touch ID', en: 'Test Face ID / Touch ID' },
+        desc: { id: 'Coba langsung di tempat. Face ID / Touch ID tidak berfungsi bisa jadi indikasi komponen diganti.', en: 'Try it on the spot. Non-functioning Face ID/Touch ID may indicate replaced components.' },
+        tag: 'warn'
+      },
+      {
+        id: 'p2_kamera',
+        title: { id: 'Test kamera depan & belakang', en: 'Test front & rear cameras' },
+        desc: { id: 'Foto dan video, depan dan belakang. Cek fokus, warna, dan stabilisasi.', en: 'Photo and video, front and back. Check focus, colors, and stabilization.' },
+        tag: 'info'
+      },
+      {
+        id: 'p2_speaker',
+        title: { id: 'Test speaker, mic & earpiece', en: 'Test speaker, mic & earpiece' },
+        desc: { id: 'Putar video YouTube (speaker), rekam voice note (mic), telepon seseorang (earpiece).', en: 'Play a YouTube video (speaker), record a voice note (mic), make a call (earpiece).' },
+        tag: 'info'
+      },
+      {
+        id: 'p2_konektivitas',
+        title: { id: 'Test WiFi, Bluetooth & SIM', en: 'Test WiFi, Bluetooth & SIM' },
+        desc: { id: 'Connect ke hotspot kamu (WiFi), scan device Bluetooth, masukkan SIM kamu dan pastikan tidak ada carrier lock.', en: 'Connect to your hotspot (WiFi), scan Bluetooth devices, insert your SIM and ensure no carrier lock.' },
+        tag: 'warn'
+      },
+      {
+        id: 'p2_fisik',
+        title: { id: 'Cek kondisi fisik menyeluruh', en: 'Check overall physical condition' },
+        desc: { id: 'Sekrup bawah lecet = pernah dibuka. Cek slot SIM, layar (retak halus di pinggir), dan semua port.', en: 'Scratched bottom screws = previously opened. Check SIM slot, screen edges (hairline cracks), all ports.' },
+        tag: 'info'
+      },
+    ]
+  },
+  {
+    id: 3,
+    title: { id: 'Fase 4 — The Final Test & Deal', en: 'Phase 4 — Final Test & Deal' },
+    items: [
+      {
+        id: 'p3_reset',
+        title: { id: '⚠️ Factory Reset di depan kamu', en: '⚠️ Factory Reset in front of you' },
+        desc: { id: 'Pengaturan → Umum → Transfer atau Reset → Hapus Semua. Setelah restart: muncul "Activate iPhone" & minta Apple ID lama = iCloud Lock = TOLAK. Layar "Hello" tanpa password = AMAN ✅', en: 'Settings → General → Transfer or Reset → Erase All. After restart: "Activate iPhone" asking old Apple ID = iCloud Lock = REJECT. "Hello" screen without password = SAFE ✅' },
+        tag: 'critical'
+      },
+      {
+        id: 'p3_nota',
+        title: { id: 'Minta nota jual beli', en: 'Request proof of purchase' },
+        desc: { id: 'Tulis tangan pun tidak apa-apa: nama, nomor HP, IMEI, harga, tanggal. Simpan juga semua bukti chat.', en: 'Handwritten is fine: name, phone number, IMEI, price, date. Save all chat evidence too.' },
+        tag: 'warn'
+      },
+      {
+        id: 'p3_bayar',
+        title: { id: 'Semua lolos → baru bayar', en: 'Everything passes → then pay' },
+        desc: { id: 'Jangan serahkan uang sebelum semua poin di atas selesai. Penjual jujur tidak akan keberatan satupun langkah ini.', en: 'Don\'t hand over money until all points above are done. Honest sellers won\'t object to any of these steps.' },
+        tag: 'critical'
+      },
+    ]
+  }
+];
+
+const imeiLinks = [
+  { label: 'Kemenperin', url: 'https://imei.kemenperin.go.id', emoji: '🇮🇩' },
+  { label: 'imei.info', url: 'https://www.imei.info', emoji: '🔍' },
+  { label: 'imeipro.info', url: 'https://imeipro.info', emoji: '🔒' },
+  { label: 'Apple Coverage', url: 'https://checkcoverage.apple.com', emoji: '🍎' },
+];
+
+const state = {};
+phases.forEach(p => p.items.forEach(item => state[item.id] = false));
+
+function setLang(l) {
+  lang.current = l;
+  document.getElementById('btn-id').classList.toggle('active', l === 'id');
+  document.getElementById('btn-en').classList.toggle('active', l === 'en');
+  document.getElementById('header-sub').textContent = translations.headerSub[l];
+  document.getElementById('footer-text').textContent = translations.footerText[l];
+  document.getElementById('btn-wa-text').textContent = translations.waText[l];
+  document.getElementById('btn-copy-text').textContent = translations.copyText[l];
+  document.getElementById('btn-reset-text').textContent = translations.resetText[l];
+
+  // Update phase pills
+  document.querySelectorAll('.phase-pill').forEach(pill => {
+    pill.textContent = pill.getAttribute(`data-${l}-text`);
+  });
+
+  // Update imei label
+  const imeiLabel = document.querySelector('.imei-label');
+  if (imeiLabel) imeiLabel.textContent = translations.imeiLabel[l];
+
+  // Re-render phases
+  renderPhases();
+  updateProgress();
+  updateVerdict();
+}
+
+function toggleItem(id) {
+  state[id] = !state[id];
+  const el = document.querySelector(`[data-id="${id}"]`);
+  if (el) {
+    el.classList.toggle('checked', state[id]);
+    if (state[id]) {
+      el.classList.add('just-checked');
+      setTimeout(() => el.classList.remove('just-checked'), 300);
+    }
+  }
+  updateProgress();
+  updateVerdict();
+  updatePhasePills();
+}
+
+function togglePhase(phaseId) {
+  const el = document.getElementById(`phase-${phaseId}`);
+  if (el) el.classList.toggle('open');
+}
+
+function getTotalItems() {
+  return Object.keys(state).length;
+}
+
+function getCheckedCount() {
+  return Object.values(state).filter(Boolean).length;
+}
+
+function getCriticalItems() {
+  const criticals = [];
+  phases.forEach(p => p.items.forEach(item => {
+    if (item.tag === 'critical') criticals.push(item.id);
+  }));
+  return criticals;
+}
+
+function updateProgress() {
+  const total = getTotalItems();
+  const checked = getCheckedCount();
+  const pct = total ? (checked / total) * 100 : 0;
+
+  document.getElementById('checked-count').textContent = checked;
+  document.getElementById('total-count').textContent = total;
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+function updatePhasePills() {
+  phases.forEach((phase, i) => {
+    const pill = document.getElementById(`pill-${i}`);
+    if (!pill) return;
+    const total = phase.items.length;
+    const checked = phase.items.filter(item => state[item.id]).length;
+    pill.classList.remove('done', 'active');
+    if (checked === total) pill.classList.add('done');
+    else if (checked > 0) pill.classList.add('active');
+  });
+}
+
+function updateVerdict() {
+  const total = getTotalItems();
+  const checked = getCheckedCount();
+  const criticals = getCriticalItems();
+  const allCriticalDone = criticals.every(id => state[id]);
+  const card = document.getElementById('verdict-card');
+  const title = document.getElementById('verdict-title');
+  const desc = document.getElementById('verdict-desc');
+  const emoji = document.getElementById('verdict-emoji');
+  const l = lang.current;
+
+  if (checked === 0) { card.classList.remove('show'); return; }
+
+  card.classList.add('show');
+  card.className = 'verdict-card show';
+
+  if (checked === total && allCriticalDone) {
+    card.classList.add('verdict-layak');
+    emoji.textContent = '✅';
+    title.textContent = translations.verdictLayakTitle[l];
+    desc.textContent = translations.verdictLayakDesc[l];
+  } else if (!allCriticalDone && checked > total * 0.5) {
+    card.classList.add('verdict-tolak');
+    emoji.textContent = '🚫';
+    title.textContent = translations.verdictTolakTitle[l];
+    desc.textContent = translations.verdictTolakDesc[l];
+  } else {
+    card.classList.add('verdict-hati');
+    emoji.textContent = '⚠️';
+    title.textContent = translations.verdictHatiTitle[l];
+    desc.textContent = translations.verdictHatiDesc[l];
+  }
+}
+
+function buildResult() {
+  const l = lang.current;
+  const checked = getCheckedCount();
+  const total = getTotalItems();
+  const pct = Math.round((checked / total) * 100);
+  let text = l === 'id'
+    ? `📱 *iCheck — Hasil Cek iPhone Second*\n\nProgress: ${checked}/${total} (${pct}%)\n\n`
+    : `📱 *iCheck — Used iPhone Check Result*\n\nProgress: ${checked}/${total} (${pct}%)\n\n`;
+
+  phases.forEach(p => {
+    text += `*${p.title[l]}*\n`;
+    p.items.forEach(item => {
+      const icon = state[item.id] ? '✅' : '⬜';
+      text += `${icon} ${item.title[l]}\n`;
+    });
+    text += '\n';
+  });
+
+  text += l === 'id'
+    ? '_Dibuat dengan iCheck — panduan beli iPhone second_'
+    : '_Made with iCheck — used iPhone buying guide_';
+  return text;
+}
+
+function shareWA() {
+  const text = encodeURIComponent(buildResult());
+  window.open(`https://wa.me/?text=${text}`, '_blank');
+}
+
+function copyResult() {
+  navigator.clipboard.writeText(buildResult()).then(() => {
+    const btn = document.getElementById('btn-copy-btn');
+    const span = document.getElementById('btn-copy-text');
+    const orig = span.textContent;
+    span.textContent = lang.current === 'id' ? 'Tersalin!' : 'Copied!';
+    btn.style.borderColor = 'var(--accent)';
+    btn.style.color = 'var(--accent)';
+    setTimeout(() => {
+      span.textContent = orig;
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }, 2000);
+  });
+}
+
+function resetAll() {
+  Object.keys(state).forEach(k => state[k] = false);
+  document.querySelectorAll('.check-item').forEach(el => el.classList.remove('checked'));
+  document.querySelectorAll('.phase-pill').forEach(el => el.classList.remove('done', 'active'));
+  document.getElementById('verdict-card').classList.remove('show');
+  updateProgress();
+}
+
+function renderPhases() {
+  const l = lang.current;
+  const container = document.getElementById('phases-container');
+  container.innerHTML = '';
+
+  phases.forEach(phase => {
+    const phaseItems = phase.items;
+    const checkedInPhase = phaseItems.filter(item => state[item.id]).length;
+    const isComplete = checkedInPhase === phaseItems.length;
+
+    const phaseEl = document.createElement('div');
+    phaseEl.className = `phase${isComplete ? ' phase-complete' : ''} open`;
+    phaseEl.id = `phase-${phase.id}`;
+
+    const tagColors = {
+      critical: `<span class="check-tag tag-critical">${l === 'id' ? 'KRITIS' : 'CRITICAL'}</span>`,
+      warn: `<span class="check-tag tag-warn">${l === 'id' ? 'PERHATIAN' : 'WARNING'}</span>`,
+      info: `<span class="check-tag tag-info">INFO</span>`,
+    };
+
+    let itemsHTML = '';
+    phaseItems.forEach(item => {
+      const isChecked = state[item.id];
+      itemsHTML += `
+        <div class="check-item${isChecked ? ' checked' : ''}" data-id="${item.id}" onclick="toggleItem('${item.id}')">
+          <div class="check-box"><span class="check-icon">✓</span></div>
+          <div class="check-content">
+            <div class="check-title">${item.title[l]}</div>
+            <div class="check-desc">${item.desc[l]}</div>
+          </div>
+          ${tagColors[item.tag] || ''}
+        </div>
+      `;
+      if (item.hasLinks) {
+        itemsHTML += `
+          <div class="imei-section">
+            <div class="imei-label">${translations.imeiLabel[l]}</div>
+            <div class="imei-links">
+              ${imeiLinks.map(link => `<a href="${link.url}" target="_blank" class="imei-link">${link.emoji} ${link.label}</a>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+    });
+
+    phaseEl.innerHTML = `
+      <div class="phase-header" onclick="togglePhase(${phase.id})">
+        <div class="phase-num">${isComplete ? '✓' : (phase.id + 1)}</div>
+        <div class="phase-title-wrap">
+          <div class="phase-title">${phase.title[l]}</div>
+          <div class="phase-meta">${checkedInPhase}/${phaseItems.length} ${l === 'id' ? 'selesai' : 'done'}</div>
+        </div>
+        <div class="phase-chevron">▾</div>
+      </div>
+      <div class="phase-body">${itemsHTML}</div>
+    `;
+
+    container.appendChild(phaseEl);
+  });
+}
+
+// Init
+renderPhases();
+updateProgress();
+updatePhasePills();
+</script>
+</body>
+</html>
