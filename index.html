@@ -3,552 +3,1022 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>iCheck — iPhone Second Checklist</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0a0a0f;
-    --surface: #111118;
-    --surface2: #1a1a24;
-    --border: #2a2a3a;
-    --accent: #7DF9C0;
-    --accent2: #4FC3F7;
-    --danger: #FF6B6B;
-    --warn: #FFD166;
-    --text: #F0F0F8;
-    --muted: #6b6b8a;
-    --radius: 16px;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    min-height: 100vh;
-    padding: 0 0 80px;
-  }
-
-  /* BG texture */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 80% 40% at 20% 0%, rgba(125,249,192,0.06) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 50% at 80% 100%, rgba(79,195,247,0.05) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .wrap { max-width: 680px; margin: 0 auto; padding: 0 16px; position: relative; z-index: 1; }
-
-  /* HEADER */
-  header {
-    padding: 36px 16px 0;
-    max-width: 680px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 1;
-  }
-
-  .header-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 8px;
-  }
-
-  .logo {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 28px;
-    letter-spacing: -1px;
-  }
-
-  .logo span { color: var(--accent); }
-
-  .lang-toggle {
-    display: flex;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    padding: 3px;
-    gap: 2px;
-  }
-
-  .lang-btn {
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    padding: 5px 12px;
-    border-radius: 100px;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.5px;
-  }
-
-  .lang-btn.active {
-    background: var(--accent);
-    color: #0a0a0f;
-    font-weight: 500;
-  }
-
-  .header-sub {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 28px;
-    font-weight: 300;
-  }
-
-  /* PROGRESS */
-  .progress-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 20px 24px;
-    margin-bottom: 24px;
-  }
-
-  .progress-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 14px;
-  }
-
-  .progress-label {
-    font-family: 'Syne', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-
-  .progress-count {
-    font-family: 'DM Mono', monospace;
-    font-size: 22px;
-    font-weight: 500;
-    color: var(--accent);
-  }
-
-  .progress-count span { color: var(--muted); font-size: 14px; }
-
-  .progress-bar-wrap {
-    background: var(--surface2);
-    border-radius: 100px;
-    height: 8px;
-    overflow: hidden;
-    margin-bottom: 12px;
-  }
-
-  .progress-bar-fill {
-    height: 100%;
-    border-radius: 100px;
-    background: linear-gradient(90deg, var(--accent), var(--accent2));
-    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    width: 0%;
-  }
-
-  .progress-phases {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  .phase-pill {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    padding: 3px 10px;
-    border-radius: 100px;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    transition: all 0.2s;
-    letter-spacing: 0.3px;
-  }
-
-  .phase-pill.done { border-color: var(--accent); color: var(--accent); }
-  .phase-pill.active { border-color: var(--accent2); color: var(--accent2); background: rgba(79,195,247,0.08); }
-
-  /* PHASES */
-  .phase {
-    margin-bottom: 20px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    overflow: hidden;
-    background: var(--surface);
-    transition: border-color 0.3s;
-  }
-
-  .phase.phase-complete { border-color: rgba(125,249,192,0.3); }
-
-  .phase-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 18px 20px;
-    cursor: pointer;
-    user-select: none;
-    transition: background 0.2s;
-  }
-
-  .phase-header:hover { background: rgba(255,255,255,0.02); }
-
-  .phase-num {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--muted);
-    flex-shrink: 0;
-    transition: all 0.2s;
-  }
-
-  .phase.phase-complete .phase-num {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #0a0a0f;
-  }
-
-  .phase-title-wrap { flex: 1; }
-
-  .phase-title {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 15px;
-    margin-bottom: 2px;
-  }
-
-  .phase-meta {
-    font-size: 11px;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-  }
-
-  .phase-chevron {
-    color: var(--muted);
-    transition: transform 0.3s;
-    font-size: 14px;
-  }
-
-  .phase.open .phase-chevron { transform: rotate(180deg); }
-
-  .phase-body {
-    display: none;
-    border-top: 1px solid var(--border);
-  }
-
-  .phase.open .phase-body { display: block; }
-
-  /* CHECK ITEMS */
-  .check-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 14px 20px;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-    cursor: pointer;
-    transition: background 0.15s;
-    position: relative;
-  }
-
-  .check-item:last-child { border-bottom: none; }
-  .check-item:hover { background: rgba(255,255,255,0.02); }
-  .check-item.checked { opacity: 0.6; }
-
-  .check-box {
-    width: 20px;
-    height: 20px;
-    border-radius: 6px;
-    border: 1.5px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-top: 1px;
-    transition: all 0.2s;
-    background: transparent;
-  }
-
-  .check-item.checked .check-box {
-    background: var(--accent);
-    border-color: var(--accent);
-  }
-
-  .check-icon {
-    opacity: 0;
-    font-size: 11px;
-    transition: opacity 0.2s;
-    color: #0a0a0f;
-  }
-
-  .check-item.checked .check-icon { opacity: 1; }
-
-  .check-content { flex: 1; }
-
-  .check-title {
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 3px;
-    transition: text-decoration 0.2s;
-  }
-
-  .check-item.checked .check-title { text-decoration: line-through; color: var(--muted); }
-
-  .check-desc {
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.5;
-    font-weight: 300;
-  }
-
-  .check-tag {
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    padding: 2px 8px;
-    border-radius: 100px;
-    border: 1px solid;
-    letter-spacing: 0.5px;
-    flex-shrink: 0;
-    margin-top: 2px;
-  }
-
-  .tag-critical { border-color: rgba(255,107,107,0.5); color: var(--danger); background: rgba(255,107,107,0.08); }
-  .tag-warn { border-color: rgba(255,209,102,0.5); color: var(--warn); background: rgba(255,209,102,0.08); }
-  .tag-info { border-color: rgba(79,195,247,0.5); color: var(--accent2); background: rgba(79,195,247,0.08); }
-
-  /* IMEI LINKS SECTION */
-  .imei-section {
-    background: var(--surface2);
-    border-top: 1px solid var(--border);
-    padding: 16px 20px;
-  }
-
-  .imei-label {
-    font-family: 'Syne', sans-serif;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--muted);
-    margin-bottom: 10px;
-  }
-
-  .imei-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .imei-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 7px 12px;
-    text-decoration: none;
-    color: var(--accent2);
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    transition: all 0.2s;
-  }
-
-  .imei-link:hover {
-    border-color: var(--accent2);
-    background: rgba(79,195,247,0.06);
-  }
-
-  /* VERDICT */
-  .verdict-card {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    margin-bottom: 20px;
-    text-align: center;
-    background: var(--surface);
-    display: none;
-  }
-
-  .verdict-card.show { display: block; }
-
-  .verdict-emoji { font-size: 40px; margin-bottom: 12px; }
-
-  .verdict-title {
-    font-family: 'Syne', sans-serif;
-    font-weight: 800;
-    font-size: 22px;
-    margin-bottom: 8px;
-  }
-
-  .verdict-desc {
-    font-size: 13px;
-    color: var(--muted);
-    font-weight: 300;
-    line-height: 1.6;
-    margin-bottom: 20px;
-  }
-
-  .verdict-layak { border-color: rgba(125,249,192,0.4); }
-  .verdict-layak .verdict-title { color: var(--accent); }
-
-  .verdict-hati { border-color: rgba(255,209,102,0.4); }
-  .verdict-hati .verdict-title { color: var(--warn); }
-
-  .verdict-tolak { border-color: rgba(255,107,107,0.4); }
-  .verdict-tolak .verdict-title { color: var(--danger); }
-
-  /* BUTTONS */
-  .btn-row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 11px 20px;
-    border-radius: 10px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    border: none;
-    transition: all 0.2s;
-    text-decoration: none;
-  }
-
-  .btn-wa {
-    background: #25D366;
-    color: #fff;
-  }
-
-  .btn-wa:hover { background: #20bc5a; transform: translateY(-1px); }
-
-  .btn-reset {
-    background: var(--surface2);
-    color: var(--muted);
-    border: 1px solid var(--border);
-  }
-
-  .btn-reset:hover { color: var(--text); border-color: var(--muted); }
-
-  .btn-copy {
-    background: var(--surface2);
-    color: var(--accent2);
-    border: 1px solid rgba(79,195,247,0.3);
-  }
-
-  .btn-copy:hover { background: rgba(79,195,247,0.08); }
-
-  /* FOOTER */
-  .footer {
-    text-align: center;
-    padding: 32px 16px 0;
-    font-size: 11px;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-  }
-
-  /* ANIMATIONS */
-  @keyframes fadeSlide {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .phase { animation: fadeSlide 0.3s ease both; }
-  .phase:nth-child(1) { animation-delay: 0.05s; }
-  .phase:nth-child(2) { animation-delay: 0.1s; }
-  .phase:nth-child(3) { animation-delay: 0.15s; }
-  .phase:nth-child(4) { animation-delay: 0.2s; }
-
-  @keyframes checkPop {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.15); }
-    100% { transform: scale(1); }
-  }
-
-  .check-item.just-checked .check-box { animation: checkPop 0.25s ease; }
-
-  /* MOBILE */
-  @media (max-width: 480px) {
-    .logo { font-size: 22px; }
-    .phase-title { font-size: 14px; }
-    .btn-row { flex-direction: column; }
-    .btn { justify-content: center; }
-  }
-</style>
-<meta name="theme-color" content="#0a0a0f">
+<meta name="theme-color" content="#ffffff">
 <link rel="manifest" href="/manifest.json">
-<script>if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
+<title>iCheck — iPhone Second Checklist</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --surface2: #f5f5f7;
+  --border: #d2d2d7;
+  --border-light: #e8e8ed;
+  --accent: #007aff;
+  --accent-dark: #0056b3;
+  --success: #34c759;
+  --success-bg: #f0fdf4;
+  --success-border: #bbf7d0;
+  --success-text: #166534;
+  --danger: #ff3b30;
+  --danger-bg: #fff5f5;
+  --danger-border: #fecaca;
+  --danger-text: #991b1b;
+  --warn: #ff9500;
+  --warn-bg: #fffbeb;
+  --warn-border: #fde68a;
+  --warn-text: #92400e;
+  --info: #007aff;
+  --info-bg: #eff6ff;
+  --info-border: #bfdbfe;
+  --info-text: #1e40af;
+  --text: #1d1d1f;
+  --text2: #424245;
+  --text3: #6e6e73;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100vh;
+  padding-bottom: 60px;
+}
+
+/* STICKY HEADER */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 0.5px solid var(--border);
+  padding: 10px 16px;
+}
+
+.sticky-inner {
+  max-width: 680px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sticky-logo {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.sticky-logo span { color: var(--accent); }
+
+.sticky-progress-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sticky-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sticky-bar-bg {
+  flex: 1;
+  height: 5px;
+  background: var(--border-light);
+  border-radius: 100px;
+  overflow: hidden;
+}
+
+.sticky-bar-fill {
+  height: 100%;
+  border-radius: 100px;
+  background: var(--accent);
+  transition: width 0.4s cubic-bezier(0.4,0,0.2,1);
+  width: 0%;
+}
+
+.sticky-counts {
+  display: flex;
+  gap: 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.count-pass { color: var(--success-text); }
+.count-fail { color: var(--danger-text); }
+.count-total { color: var(--text3); }
+
+.sticky-score {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent);
+  flex-shrink: 0;
+  min-width: 48px;
+  text-align: right;
+}
+
+.lang-toggle {
+  display: flex;
+  background: var(--surface2);
+  border: 0.5px solid var(--border);
+  border-radius: 100px;
+  padding: 2px;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.lang-btn {
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.lang-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* MAIN WRAP */
+.wrap { max-width: 680px; margin: 0 auto; padding: 0 16px; }
+
+/* HERO */
+.hero {
+  padding: 28px 0 20px;
+  border-bottom: 0.5px solid var(--border-light);
+  margin-bottom: 20px;
+}
+
+.hero-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+}
+
+.hero-sub {
+  font-size: 14px;
+  color: var(--text3);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+/* SELLER CARD */
+.seller-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+
+.seller-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.seller-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.seller-badge {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 100px;
+  background: var(--surface2);
+  color: var(--text3);
+  border: 0.5px solid var(--border);
+  font-weight: 500;
+}
+
+.seller-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.seller-field label {
+  display: block;
+  font-size: 11px;
+  color: var(--text3);
+  font-weight: 500;
+  margin-bottom: 4px;
+  letter-spacing: 0.02em;
+}
+
+.seller-field input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  background: var(--surface2);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.seller-field input:focus { border-color: var(--accent); background: var(--surface); }
+.seller-field input::placeholder { color: var(--text3); }
+.seller-field.full { grid-column: 1 / -1; }
+
+/* MODEL SELECTOR */
+.model-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.model-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.model-select {
+  flex: 1;
+  padding: 8px 12px;
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  background: var(--surface2);
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236e6e73' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 30px;
+}
+
+.model-select:focus { border-color: var(--accent); }
+
+.model-note {
+  font-size: 11px;
+  color: var(--text3);
+  margin-top: 6px;
+  padding: 0 18px 10px;
+}
+
+/* PHASES */
+.phase {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.phase.phase-complete { border-color: var(--success); }
+.phase.phase-has-fail { border-color: var(--danger); border-width: 1px; }
+
+.phase-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.phase-header:active { background: var(--surface2); }
+
+.phase-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 0.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text3);
+  flex-shrink: 0;
+  background: var(--surface2);
+  transition: all 0.2s;
+}
+
+.phase.phase-complete .phase-num {
+  background: var(--success);
+  border-color: var(--success);
+  color: #fff;
+}
+
+.phase.phase-has-fail .phase-num {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+
+.phase-title-wrap { flex: 1; }
+
+.phase-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 1px;
+}
+
+.phase-meta {
+  font-size: 11px;
+  color: var(--text3);
+  font-family: 'DM Mono', monospace;
+}
+
+.phase-chevron {
+  font-size: 12px;
+  color: var(--text3);
+  transition: transform 0.25s;
+}
+
+.phase.open .phase-chevron { transform: rotate(180deg); }
+
+.phase-body {
+  display: none;
+  border-top: 0.5px solid var(--border-light);
+}
+
+.phase.open .phase-body { display: block; }
+
+/* CHECK ITEMS */
+.check-item {
+  padding: 14px 16px;
+  border-bottom: 0.5px solid var(--border-light);
+}
+
+.check-item:last-child { border-bottom: none; }
+
+.check-item.state-pass { background: var(--success-bg); }
+.check-item.state-fail { background: var(--danger-bg); }
+
+.check-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.check-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.4;
+  flex: 1;
+}
+
+.check-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 100px;
+  border: 0.5px solid;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.tag-critical { border-color: var(--danger); color: var(--danger); background: var(--danger-bg); }
+.tag-warn { border-color: var(--warn); color: var(--warn); background: var(--warn-bg); }
+.tag-info { border-color: var(--info); color: var(--info); background: var(--info-bg); }
+
+.check-desc {
+  font-size: 12px;
+  color: var(--text3);
+  line-height: 1.6;
+  margin-bottom: 8px;
+}
+
+/* EXAMPLE BOX */
+.check-example {
+  background: var(--info-bg);
+  border: 0.5px solid var(--info-border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+  font-size: 11px;
+  color: var(--info-text);
+  line-height: 1.6;
+}
+
+.check-example strong { font-weight: 600; }
+
+/* PASS/FAIL BUTTONS */
+.check-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 0;
+}
+
+.btn-pass, .btn-fail {
+  flex: 1;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: 1.5px solid;
+  letter-spacing: 0.02em;
+}
+
+.btn-pass {
+  background: var(--surface2);
+  color: var(--success-text);
+  border-color: var(--success-border);
+}
+
+.btn-pass:hover, .btn-pass.active {
+  background: var(--success);
+  color: #fff;
+  border-color: var(--success);
+}
+
+.btn-pass.active { box-shadow: 0 0 0 3px rgba(52,199,89,0.2); }
+
+.btn-fail {
+  background: var(--surface2);
+  color: var(--danger-text);
+  border-color: var(--danger-border);
+}
+
+.btn-fail:hover, .btn-fail.active {
+  background: var(--danger);
+  color: #fff;
+  border-color: var(--danger);
+}
+
+.btn-fail.active { box-shadow: 0 0 0 3px rgba(255,59,48,0.2); }
+
+/* NOTE INPUT */
+.note-input-wrap {
+  margin-top: 8px;
+  display: none;
+}
+
+.note-input-wrap.show { display: block; }
+
+.note-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 0.5px solid var(--danger-border);
+  border-radius: 8px;
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  resize: none;
+  min-height: 60px;
+  transition: border-color 0.2s;
+}
+
+.note-input:focus { border-color: var(--danger); }
+.note-input::placeholder { color: var(--text3); }
+
+/* BATTERY INPUT */
+.battery-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  background: var(--surface2);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.battery-input {
+  width: 64px;
+  padding: 6px 8px;
+  border: 0.5px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'DM Mono', monospace;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+  text-align: center;
+}
+
+.battery-input:focus { border-color: var(--accent); }
+
+.battery-result {
+  font-size: 12px;
+  font-weight: 500;
+  flex: 1;
+}
+
+.batt-great { color: var(--success-text); }
+.batt-good { color: var(--info-text); }
+.batt-ok { color: var(--warn-text); }
+.batt-bad { color: var(--danger-text); }
+
+/* IMEI LINKS */
+.imei-section {
+  background: var(--surface2);
+  border-top: 0.5px solid var(--border-light);
+  padding: 10px 16px 12px;
+}
+
+.imei-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.imei-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.imei-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  text-decoration: none;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+.imei-link:hover { border-color: var(--accent); background: var(--info-bg); }
+
+/* SCORE CARD */
+.score-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  display: none;
+}
+
+.score-card.show { display: block; }
+
+.score-top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.score-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  flex-shrink: 0;
+  font-family: 'DM Mono', monospace;
+}
+
+.score-num {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.score-of {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.score-layak .score-circle { background: var(--success-bg); border: 2px solid var(--success); color: var(--success-text); }
+.score-hati .score-circle { background: var(--warn-bg); border: 2px solid var(--warn); color: var(--warn-text); }
+.score-tolak .score-circle { background: var(--danger-bg); border: 2px solid var(--danger); color: var(--danger-text); }
+
+.score-info { flex: 1; }
+
+.score-verdict {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.score-layak .score-verdict { color: var(--success-text); }
+.score-hati .score-verdict { color: var(--warn-text); }
+.score-tolak .score-verdict { color: var(--danger-text); }
+
+.score-desc {
+  font-size: 12px;
+  color: var(--text3);
+  line-height: 1.5;
+}
+
+.score-breakdown {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.score-stat {
+  background: var(--surface2);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+
+.score-stat-num {
+  font-size: 20px;
+  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  margin-bottom: 2px;
+}
+
+.score-stat-label {
+  font-size: 10px;
+  color: var(--text3);
+  font-weight: 500;
+}
+
+.stat-pass .score-stat-num { color: var(--success-text); }
+.stat-fail .score-stat-num { color: var(--danger-text); }
+.stat-skip .score-stat-num { color: var(--text3); }
+
+/* PRICE SUGGESTION */
+.price-card {
+  background: var(--surface2);
+  border: 0.5px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.price-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+
+.price-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.price-input-row label {
+  font-size: 12px;
+  color: var(--text2);
+  flex-shrink: 0;
+}
+
+.price-input {
+  flex: 1;
+  padding: 7px 10px;
+  border: 0.5px solid var(--border);
+  border-radius: 7px;
+  font-size: 13px;
+  font-family: 'DM Mono', monospace;
+  color: var(--text);
+  background: var(--surface);
+  outline: none;
+}
+
+.price-input:focus { border-color: var(--accent); }
+
+.price-result {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.7;
+  display: none;
+}
+
+.price-result.show { display: block; }
+.price-result strong { color: var(--text); font-weight: 600; }
+.price-ok { color: var(--success-text); font-weight: 600; }
+.price-high { color: var(--danger-text); font-weight: 600; }
+.price-low { color: var(--info-text); font-weight: 600; }
+
+/* ACTION BUTTONS */
+.action-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px;
+  border-radius: 9px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  text-decoration: none;
+  flex: 1;
+  justify-content: center;
+}
+
+.btn-wa { background: #25d366; color: #fff; }
+.btn-wa:hover { background: #1cb856; }
+
+.btn-copy {
+  background: var(--surface);
+  color: var(--accent);
+  border: 0.5px solid var(--info-border);
+}
+
+.btn-copy:hover { background: var(--info-bg); }
+
+.btn-pdf {
+  background: var(--surface);
+  color: var(--text2);
+  border: 0.5px solid var(--border);
+}
+
+.btn-pdf:hover { background: var(--surface2); }
+
+.btn-reset {
+  background: var(--surface);
+  color: var(--danger);
+  border: 0.5px solid var(--danger-border);
+}
+
+.btn-reset:hover { background: var(--danger-bg); }
+
+/* TIMESTAMP */
+.timestamp-bar {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text3);
+  font-family: 'DM Mono', monospace;
+  padding: 8px 0 4px;
+  margin-bottom: 12px;
+}
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  padding: 24px 16px 0;
+  font-size: 11px;
+  color: var(--text3);
+  font-family: 'DM Mono', monospace;
+}
+
+/* PRINT */
+@media print {
+  .sticky-header, .action-row, .check-actions, .note-input-wrap, .battery-input-wrap, .imei-section, .seller-header .seller-badge { display: none !important; }
+  body { background: #fff; padding: 0; }
+  .phase { box-shadow: none; break-inside: avoid; }
+  .score-card, .price-card { break-inside: avoid; }
+}
+
+/* MOBILE */
+@media (max-width: 480px) {
+  .hero-title { font-size: 22px; }
+  .seller-fields { grid-template-columns: 1fr; }
+  .score-breakdown { grid-template-columns: 1fr 1fr 1fr; }
+  .action-row { flex-direction: column; }
+  .sticky-score { display: none; }
+}
+
+/* ANIMATIONS */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.phase { animation: slideIn 0.25s ease both; }
+.phase:nth-child(1) { animation-delay: 0.04s; }
+.phase:nth-child(2) { animation-delay: 0.08s; }
+.phase:nth-child(3) { animation-delay: 0.12s; }
+.phase:nth-child(4) { animation-delay: 0.16s; }
+</style>
 </head>
 <body>
 
-<header>
-  <div class="header-top">
-    <div class="logo">i<span>Check</span></div>
+<!-- STICKY HEADER -->
+<div class="sticky-header">
+  <div class="sticky-inner">
+    <div class="sticky-logo">i<span>Check</span></div>
+    <div class="sticky-progress-wrap">
+      <div class="sticky-bar-row">
+        <div class="sticky-bar-bg"><div class="sticky-bar-fill" id="sticky-fill"></div></div>
+      </div>
+      <div class="sticky-counts">
+        <span class="count-pass" id="sc-pass">0 pass</span>
+        <span class="count-fail" id="sc-fail">0 not pass</span>
+        <span class="count-total" id="sc-total">/ 21 item</span>
+      </div>
+    </div>
+    <div class="sticky-score" id="sticky-score">—</div>
     <div class="lang-toggle">
       <button class="lang-btn active" onclick="setLang('id')" id="btn-id">ID</button>
       <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
     </div>
   </div>
-  <div class="header-sub" id="header-sub">Panduan lengkap beli iPhone second. Jangan deal sebelum semua lolos.</div>
-</header>
+</div>
 
 <div class="wrap">
 
-  <!-- PROGRESS -->
-  <div class="progress-card">
-    <div class="progress-header">
-      <div class="progress-label" id="prog-label">Progress</div>
-      <div class="progress-count"><span id="checked-count">0</span><span> / <span id="total-count">0</span></span></div>
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-title" id="hero-title">Cek iPhone Second</div>
+    <div class="hero-sub" id="hero-sub">Panduan lengkap beli iPhone second. Jangan deal sebelum semua lolos.</div>
+  </div>
+
+  <!-- SELLER INFO -->
+  <div class="seller-card" id="seller-card">
+    <div class="seller-header" onclick="toggleSeller()">
+      <div class="seller-title" id="seller-title">Data Penjual <span style="font-size:11px;font-weight:400;color:var(--text3)">(opsional)</span></div>
+      <div class="seller-badge" id="seller-badge">Isi sekarang ▾</div>
     </div>
-    <div class="progress-bar-wrap">
-      <div class="progress-bar-fill" id="progress-fill"></div>
-    </div>
-    <div class="progress-phases">
-      <div class="phase-pill" id="pill-0" data-id-text="Sebelum Ketemu" data-en-text="Before Meeting">Sebelum Ketemu</div>
-      <div class="phase-pill" id="pill-1" data-id-text="Saat COD" data-en-text="At COD">Saat COD</div>
-      <div class="phase-pill" id="pill-2" data-id-text="Hardware" data-en-text="Hardware">Hardware</div>
-      <div class="phase-pill" id="pill-3" data-id-text="Deal" data-en-text="Deal">Deal</div>
+    <div id="seller-fields">
+      <div class="seller-fields">
+        <div class="seller-field">
+          <label id="lbl-name">Nama Penjual</label>
+          <input type="text" id="seller-name" placeholder="Contoh: Budi" oninput="saveSeller()">
+        </div>
+        <div class="seller-field">
+          <label id="lbl-phone">No. HP / WA</label>
+          <input type="tel" id="seller-phone" placeholder="0812xxxxxxxx" oninput="saveSeller()">
+        </div>
+        <div class="seller-field">
+          <label id="lbl-platform">Platform Jual</label>
+          <input type="text" id="seller-platform" placeholder="Tokopedia / COD / dll" oninput="saveSeller()">
+        </div>
+        <div class="seller-field">
+          <label id="lbl-price">Harga Ditawarkan (Rp)</label>
+          <input type="number" id="seller-price" placeholder="Contoh: 5500000" oninput="saveSeller(); calcPrice()">
+        </div>
+        <div class="seller-field full">
+          <label id="lbl-imei-input">IMEI (dari *#06#)</label>
+          <input type="text" id="seller-imei" placeholder="Contoh: 353066060999999" oninput="saveSeller()">
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- VERDICT -->
-  <div class="verdict-card" id="verdict-card">
-    <div class="verdict-emoji" id="verdict-emoji">✅</div>
-    <div class="verdict-title" id="verdict-title">Layak Beli</div>
-    <div class="verdict-desc" id="verdict-desc">Semua poin kritis telah dicek. iPhone ini tampak aman untuk dibeli.</div>
-    <div class="btn-row">
-      <button class="btn btn-wa" onclick="shareWA()" id="btn-wa">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-        <span id="btn-wa-text">Share ke WhatsApp</span>
+  <!-- MODEL SELECTOR -->
+  <div class="model-card">
+    <div class="model-label" id="model-label">Tipe iPhone:</div>
+    <select class="model-select" id="model-select" onchange="onModelChange()">
+      <option value="">— Pilih tipe —</option>
+      <optgroup label="iPhone Lawas">
+        <option value="6">iPhone 6</option>
+        <option value="6s">iPhone 6s / 6s Plus</option>
+        <option value="se1">iPhone SE (Gen 1, 2016)</option>
+        <option value="7">iPhone 7 / 7 Plus</option>
+        <option value="8">iPhone 8 / 8 Plus</option>
+        <option value="se2">iPhone SE (Gen 2, 2020)</option>
+      </optgroup>
+      <optgroup label="iPhone X Series">
+        <option value="x">iPhone X</option>
+        <option value="xr">iPhone XR</option>
+        <option value="xs">iPhone XS / XS Max</option>
+      </optgroup>
+      <optgroup label="iPhone 11 Series">
+        <option value="11">iPhone 11</option>
+        <option value="11pro">iPhone 11 Pro / Pro Max</option>
+      </optgroup>
+      <optgroup label="iPhone 12 Series">
+        <option value="12mini">iPhone 12 mini</option>
+        <option value="12">iPhone 12</option>
+        <option value="12pro">iPhone 12 Pro / Pro Max</option>
+      </optgroup>
+      <optgroup label="iPhone 13 Series">
+        <option value="13mini">iPhone 13 mini</option>
+        <option value="13">iPhone 13</option>
+        <option value="13pro">iPhone 13 Pro / Pro Max</option>
+      </optgroup>
+      <optgroup label="iPhone 14 Series">
+        <option value="14">iPhone 14 / Plus</option>
+        <option value="14pro">iPhone 14 Pro / Pro Max</option>
+        <option value="se3">iPhone SE (Gen 3, 2022)</option>
+      </optgroup>
+      <optgroup label="iPhone 15 Series">
+        <option value="15">iPhone 15 / Plus</option>
+        <option value="15pro">iPhone 15 Pro / Pro Max</option>
+      </optgroup>
+      <optgroup label="iPhone 16 Series">
+        <option value="16">iPhone 16 / Plus</option>
+        <option value="16pro">iPhone 16 Pro / Pro Max</option>
+        <option value="se4">iPhone SE (Gen 4, 2025)</option>
+      </optgroup>
+    </select>
+  </div>
+  <div class="model-note" id="model-note" style="display:none"></div>
+
+  <!-- SCORE CARD -->
+  <div class="score-card" id="score-card">
+    <div class="score-top">
+      <div class="score-circle" id="score-circle">
+        <div class="score-num" id="score-num">0</div>
+        <div class="score-of">/100</div>
+      </div>
+      <div class="score-info">
+        <div class="score-verdict" id="score-verdict">Mulai pengecekan</div>
+        <div class="score-desc" id="score-desc">Tap PASS atau NOT PASS pada setiap item di bawah.</div>
+      </div>
+    </div>
+    <div class="score-breakdown">
+      <div class="score-stat stat-pass">
+        <div class="score-stat-num" id="stat-pass-num">0</div>
+        <div class="score-stat-label" id="stat-pass-lbl">Pass</div>
+      </div>
+      <div class="score-stat stat-fail">
+        <div class="score-stat-num" id="stat-fail-num">0</div>
+        <div class="score-stat-label" id="stat-fail-lbl">Not Pass</div>
+      </div>
+      <div class="score-stat stat-skip">
+        <div class="score-stat-num" id="stat-skip-num">21</div>
+        <div class="score-stat-label" id="stat-skip-lbl">Belum dicek</div>
+      </div>
+    </div>
+    <div class="price-card" id="price-card">
+      <div class="price-label" id="price-label">Saran Harga Wajar</div>
+      <div class="price-result show" id="price-result">Pilih tipe iPhone dan isi harga penjual untuk melihat saran harga.</div>
+    </div>
+    <div class="timestamp-bar" id="timestamp-bar"></div>
+    <div class="action-row">
+      <button class="action-btn btn-wa" onclick="shareWA()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        <span id="btn-wa-lbl">Share WA</span>
       </button>
-      <button class="btn btn-copy" onclick="copyResult()" id="btn-copy-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-        <span id="btn-copy-text">Copy Hasil</span>
+      <button class="action-btn btn-copy" onclick="copyResult()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+        <span id="btn-copy-lbl">Copy</span>
       </button>
-      <button class="btn btn-reset" onclick="resetAll()" id="btn-reset-btn">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
-        <span id="btn-reset-text">Reset</span>
+      <button class="action-btn btn-pdf" onclick="window.print()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        <span id="btn-pdf-lbl">Cetak</span>
+      </button>
+      <button class="action-btn btn-reset" onclick="resetAll()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+        <span id="btn-reset-lbl">Reset</span>
       </button>
     </div>
   </div>
 
-  <!-- PHASES CONTAINER -->
+  <!-- PHASES -->
   <div id="phases-container"></div>
 
   <div class="footer">
@@ -557,26 +1027,114 @@
 </div>
 
 <script>
-const lang = { current: 'id' };
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 
-const translations = {
-  headerSub: {
-    id: 'Panduan lengkap beli iPhone second. Jangan deal sebelum semua lolos.',
-    en: 'Complete guide to buying a used iPhone. Don\'t deal until everything passes.'
-  },
-  progLabel: { id: 'Progress', en: 'Progress' },
-  verdictLayakTitle: { id: 'Layak Beli ✅', en: 'Worth Buying ✅' },
-  verdictLayakDesc: { id: 'Semua poin kritis telah dicek. iPhone ini tampak aman untuk dibeli.', en: 'All critical points checked. This iPhone appears safe to purchase.' },
-  verdictHatiTitle: { id: 'Hati-Hati ⚠️', en: 'Proceed with Caution ⚠️' },
-  verdictHatiDesc: { id: 'Belum semua poin dicek. Pastikan semua item selesai sebelum membayar.', en: 'Not all points checked yet. Make sure everything is verified before paying.' },
-  verdictTolakTitle: { id: 'Jangan Dibeli 🚫', en: 'Do Not Buy 🚫' },
-  verdictTolakDesc: { id: 'Ada poin kritis yang gagal atau dilewati. Tolak transaksi ini.', en: 'Critical points failed or skipped. Reject this transaction.' },
-  waText: { id: 'Share ke WhatsApp', en: 'Share to WhatsApp' },
-  copyText: { id: 'Copy Hasil', en: 'Copy Result' },
-  resetText: { id: 'Reset', en: 'Reset' },
+const L = { cur: 'id' };
+
+const T = {
+  heroTitle: { id: 'Cek iPhone Second', en: 'Check Used iPhone' },
+  heroSub: { id: 'Panduan lengkap beli iPhone second. Jangan deal sebelum semua lolos.', en: 'Complete guide to buying a used iPhone. Don\'t deal until everything passes.' },
+  sellerTitle: { id: 'Data Penjual', en: 'Seller Info' },
+  sellerOpt: { id: '(opsional)', en: '(optional)' },
+  lblName: { id: 'Nama Penjual', en: 'Seller Name' },
+  lblPhone: { id: 'No. HP / WA', en: 'Phone / WA' },
+  lblPlatform: { id: 'Platform Jual', en: 'Selling Platform' },
+  lblPrice: { id: 'Harga Ditawarkan (Rp)', en: 'Asking Price (Rp)' },
+  lblImei: { id: 'IMEI (dari *#06#)', en: 'IMEI (from *#06#)' },
+  modelLabel: { id: 'Tipe iPhone:', en: 'iPhone Model:' },
+  passBtn: { id: 'PASS', en: 'PASS' },
+  failBtn: { id: 'NOT PASS', en: 'NOT PASS' },
+  notePlaceholder: { id: 'Tulis catatan... (misal: ada goresan kecil)', en: 'Write a note... (e.g. minor scratch)' },
+  imeiLabel: { id: 'CEK IMEI ONLINE', en: 'CHECK IMEI ONLINE' },
+  battLabel: { id: 'Masukkan % baterai:', en: 'Enter battery %:' },
+  battGreat: { id: 'Sangat Baik — tidak perlu ganti', en: 'Excellent — no need to replace' },
+  battGood: { id: 'Baik — masih nyaman dipakai', en: 'Good — comfortable to use' },
+  battOk: { id: 'Cukup — pertimbangkan ganti baterai', en: 'Fair — consider battery replacement' },
+  battBad: { id: 'Buruk — harus ganti baterai', en: 'Poor — must replace battery' },
+  verdictLayak: { id: 'Layak Beli', en: 'Worth Buying' },
+  verdictHati: { id: 'Hati-Hati', en: 'Proceed with Caution' },
+  verdictTolak: { id: 'Jangan Dibeli', en: 'Do Not Buy' },
+  descLayak: { id: 'Semua item kritis lolos. iPhone ini aman untuk dibeli.', en: 'All critical items passed. This iPhone is safe to buy.' },
+  descHati: { id: 'Ada item yang belum dicek atau ada NOT PASS. Periksa ulang sebelum membayar.', en: 'Some items unchecked or failed. Review before paying.' },
+  descTolak: { id: 'Ada item KRITIS yang tidak lolos. Sangat tidak disarankan membeli iPhone ini.', en: 'Critical items failed. Strongly advised not to buy this iPhone.' },
+  priceLabel: { id: 'Saran Harga Wajar', en: 'Fair Price Suggestion' },
+  statPassLbl: { id: 'Pass', en: 'Pass' },
+  statFailLbl: { id: 'Not Pass', en: 'Not Pass' },
+  statSkipLbl: { id: 'Belum dicek', en: 'Not checked' },
+  btnWa: { id: 'Share WA', en: 'Share WA' },
+  btnCopy: { id: 'Copy', en: 'Copy' },
+  btnPdf: { id: 'Cetak', en: 'Print' },
+  btnReset: { id: 'Reset', en: 'Reset' },
   footerText: { id: 'iCheck — dibuat untuk membantu kamu beli iPhone second dengan aman.', en: 'iCheck — made to help you buy used iPhones safely.' },
-  imeiLabel: { id: '🔗 CEK IMEI ONLINE', en: '🔗 CHECK IMEI ONLINE' },
 };
+
+const imeiLinks = [
+  { label: 'IMEI.org', url: 'https://www.imei.org', icon: '🔍' },
+  { label: 'SNDeep', url: 'https://www.sndeep.info', icon: '🔒' },
+  { label: 'DeviceCheck', url: 'https://devicecheck.io', icon: '📱' },
+  { label: 'Apple Support', url: 'https://support.apple.com/check-coverage', icon: '🍎' },
+];
+
+// Price ranges per model (Rp, kondisi normal mid-2025)
+const priceRanges = {
+  '6':    [300000, 600000],
+  '6s':   [400000, 800000],
+  'se1':  [500000, 900000],
+  '7':    [700000, 1300000],
+  '8':    [1000000, 1800000],
+  'se2':  [1500000, 2500000],
+  'x':    [1800000, 2800000],
+  'xr':   [2000000, 3200000],
+  'xs':   [2200000, 3500000],
+  '11':   [3000000, 4500000],
+  '11pro':[3500000, 5500000],
+  '12mini':[2800000, 4000000],
+  '12':   [3500000, 5000000],
+  '12pro':[4000000, 6000000],
+  '13mini':[4000000, 5500000],
+  '13':   [4500000, 6500000],
+  '13pro':[5500000, 8000000],
+  '14':   [6000000, 8500000],
+  '14pro':[7500000, 11000000],
+  'se3':  [3500000, 5500000],
+  '15':   [8000000, 11000000],
+  '15pro':[10000000, 14000000],
+  '16':   [10000000, 13500000],
+  '16pro':[13000000, 17000000],
+  'se4':  [5000000, 7000000],
+};
+
+const modelNotes = {
+  '6':   { id: 'Touch ID | Tidak support iOS terbaru | Sudah sangat tua', en: 'Touch ID | No latest iOS support | Very old' },
+  '6s':  { id: 'Touch ID | Sudah tua, tidak support iOS baru', en: 'Touch ID | Old, no new iOS support' },
+  'se1': { id: 'Touch ID | Form factor iPhone 5 | Tidak support iOS baru', en: 'Touch ID | iPhone 5 form factor | No new iOS' },
+  '7':   { id: 'Touch ID | Tidak ada jack 3.5mm | Cek water damage', en: 'Touch ID | No headphone jack | Check water damage' },
+  '8':   { id: 'Touch ID | Wireless charging | Cek kondisi kaca belakang', en: 'Touch ID | Wireless charging | Check rear glass' },
+  'se2': { id: 'Touch ID | Chip A13 | Form factor iPhone 8', en: 'Touch ID | A13 chip | iPhone 8 form factor' },
+  'x':   { id: 'Face ID | OLED pertama | Cek notch dan Face ID dengan teliti', en: 'Face ID | First OLED | Check notch and Face ID carefully' },
+  'xr':  { id: 'Face ID | LCD (bukan OLED) | Tidak ada telephoto', en: 'Face ID | LCD (not OLED) | No telephoto lens' },
+  'xs':  { id: 'Face ID | OLED | Dual camera | Cek kondisi baterai', en: 'Face ID | OLED | Dual camera | Check battery' },
+  '11':  { id: 'Face ID | Dual kamera belakang | Baterai biasanya masih bagus', en: 'Face ID | Dual rear camera | Battery usually still good' },
+  '11pro':{ id: 'Face ID | Triple kamera | OLED ProMotion | Cek semua lensa', en: 'Face ID | Triple camera | OLED | Check all lenses' },
+  '12mini':{ id: 'Face ID | 5G | MagSafe | Form kecil | Baterai cenderung kecil', en: 'Face ID | 5G | MagSafe | Small form | Smaller battery' },
+  '12':  { id: 'Face ID | 5G | MagSafe | Banyak beredar di pasaran', en: 'Face ID | 5G | MagSafe | Widely available' },
+  '12pro':{ id: 'Face ID | 5G | LiDAR | ProRAW | Cek semua sensor', en: 'Face ID | 5G | LiDAR | ProRAW | Check all sensors' },
+  '13mini':{ id: 'Face ID | 5G | Baterai lebih besar dari 12 mini', en: 'Face ID | 5G | Bigger battery than 12 mini' },
+  '13':  { id: 'Face ID | 5G | Kamera sangat bagus | Value for money terbaik', en: 'Face ID | 5G | Excellent camera | Best value for money' },
+  '13pro':{ id: 'Face ID | ProMotion 120Hz | LiDAR | Kamera macro', en: 'Face ID | ProMotion 120Hz | LiDAR | Macro camera' },
+  '14':  { id: 'Face ID | Dynamic Island hanya di Pro | Chip sama dengan 13 Pro', en: 'Face ID | Dynamic Island only on Pro | Same chip as 13 Pro' },
+  '14pro':{ id: 'Face ID | Dynamic Island | 48MP kamera | ProMotion 120Hz', en: 'Face ID | Dynamic Island | 48MP camera | 120Hz' },
+  'se3': { id: 'Touch ID | 5G | Chip A15 | Form factor iPhone 8', en: 'Touch ID | 5G | A15 chip | iPhone 8 form factor' },
+  '15':  { id: 'Face ID | USB-C (ganti dari Lightning) | Dynamic Island | 48MP', en: 'Face ID | USB-C | Dynamic Island | 48MP' },
+  '15pro':{ id: 'Face ID | Titanium frame | USB 3 | Action Button | 5x zoom', en: 'Face ID | Titanium frame | USB 3 | Action Button | 5x zoom' },
+  '16':  { id: 'Face ID | USB-C | Action Button | Camera Control button | Apple Intelligence', en: 'Face ID | USB-C | Action Button | Camera Control | Apple Intelligence' },
+  '16pro':{ id: 'Face ID | Titanium | 5x zoom | 4K120 video | Apple Intelligence', en: 'Face ID | Titanium | 5x zoom | 4K120fps | Apple Intelligence' },
+  'se4': { id: 'Face ID | USB-C | 5G | Action Button | Apple Intelligence', en: 'Face ID | USB-C | 5G | Action Button | Apple Intelligence' },
+};
+
+const hasFaceID = ['x','xr','xs','11','11pro','12mini','12','12pro','13mini','13','13pro','14','14pro','15','15pro','16','16pro','se4'];
+const hasTouchID = ['6','6s','se1','7','8','se2','se3'];
+const hasUSBC = ['15','15pro','16','16pro','se4'];
 
 const phases = [
   {
@@ -587,34 +1145,29 @@ const phases = [
         id: 'p0_imei',
         title: { id: 'Minta foto IMEI dari penjual', en: 'Request IMEI photo from seller' },
         desc: { id: 'Minta screenshot hasil *#06# atau foto IMEI di body/dus.', en: 'Request screenshot of *#06# or photo of IMEI on body/box.' },
-        tag: 'critical'
+        example: { id: 'Contoh PASS: Penjual kirim foto IMEI 15 digit yang terbaca jelas, misal: 353066060123456', en: 'Example PASS: Seller sends clear photo of 15-digit IMEI, e.g.: 353066060123456' },
+        tag: 'critical', hasLinks: false
       },
       {
-        id: 'p0_kemenperin',
-        title: { id: 'Cek IMEI di Kemenperin', en: 'Check IMEI on Kemenperin' },
-        desc: { id: 'Pastikan terdaftar di imei.kemenperin.go.id. Jika tidak, bisa diblokir pemerintah.', en: 'Verify registration at imei.kemenperin.go.id. If not listed, it can be blocked.' },
-        tag: 'critical',
-        hasLinks: true
+        id: 'p0_imei_check',
+        title: { id: 'Cek IMEI di database internasional', en: 'Check IMEI in international database' },
+        desc: { id: 'Gunakan IMEI.org atau SNDeep — pastikan status "VALID" dan tidak masuk daftar stolen/lost/blacklist.', en: 'Use IMEI.org or SNDeep — ensure status is "VALID" and not listed as stolen/lost/blacklisted.' },
+        example: { id: 'Contoh PASS: Status "Valid - Not Reported Lost or Stolen". Merek & model sesuai dengan yang dijual.', en: 'Example PASS: Status "Valid - Not Reported Lost or Stolen". Brand & model match what is advertised.' },
+        tag: 'critical', hasLinks: true
       },
       {
-        id: 'p0_blacklist',
-        title: { id: 'Cek status blacklist IMEI', en: 'Check IMEI blacklist status' },
-        desc: { id: 'Gunakan imei.info atau imeipro.info — pastikan tidak masuk daftar stolen/lost.', en: 'Use imei.info or imeipro.info — ensure it\'s not listed as stolen/lost.' },
-        tag: 'critical',
-        hasLinks: true
-      },
-      {
-        id: 'p0_coverage',
-        title: { id: 'Cek di Apple Coverage', en: 'Check Apple Coverage' },
-        desc: { id: 'Buka checkcoverage.apple.com — cek status garansi dan aktivasi Apple.', en: 'Visit checkcoverage.apple.com — verify warranty and Apple activation status.' },
-        tag: 'info',
-        hasLinks: true
+        id: 'p0_devicecheck',
+        title: { id: 'Cek status Apple Coverage', en: 'Check Apple Coverage status' },
+        desc: { id: 'Buka support.apple.com/check-coverage — cek status garansi dan apakah sudah pernah diaktivasi. Perlu IMEI/serial number.', en: 'Open support.apple.com/check-coverage — check warranty status and whether device was ever activated. Need IMEI/serial.' },
+        example: { id: 'Contoh PASS: Muncul info model iPhone, status aktivasi terlihat, expired warranty adalah normal untuk second.', en: 'Example PASS: iPhone model info appears, activation status visible, expired warranty is normal for used devices.' },
+        tag: 'info', hasLinks: true
       },
       {
         id: 'p0_harga',
         title: { id: 'Bandingkan harga pasaran', en: 'Compare market price' },
-        desc: { id: 'Cek di Tokopedia atau iBox second. Harga terlalu murah = red flag.', en: 'Check Tokopedia or iBox second. Price too low = red flag.' },
-        tag: 'warn'
+        desc: { id: 'Cek harga di Tokopedia/OLX second. Harga terlalu murah (>20% di bawah pasaran) = red flag besar.', en: 'Check prices on Tokopedia/OLX used market. Price too low (>20% below market) = major red flag.' },
+        example: { id: 'Contoh PASS: Harga iPhone 13 second di pasaran Rp 4.5–6.5 juta. Penjual minta Rp 5 juta = wajar.', en: 'Example PASS: Used iPhone 13 market price Rp 4.5–6.5M. Seller asks Rp 5M = fair.' },
+        tag: 'warn', hasLinks: false
       },
     ]
   },
@@ -624,27 +1177,31 @@ const phases = [
     items: [
       {
         id: 'p1_regional',
-        title: { id: 'Cek kode regional', en: 'Check regional code' },
-        desc: { id: 'Pengaturan → Umum → Tentang → Nomor Model. Tap sekali agar kode lengkap muncul. PA/A (iBox), ID/A (Telkomsel), FE/A (Indosat) = aman.', en: 'Settings → General → About → Model Number. Tap once to see full code. PA/A (iBox), ID/A (Telkomsel), FE/A (Indosat) = safe.' },
-        tag: 'warn'
+        title: { id: 'Cek kode regional iPhone', en: 'Check iPhone regional code' },
+        desc: { id: 'Settings → Umum → Tentang → Nomor Model. Tap sekali untuk lihat kode lengkap. PA/A atau LL/A = iBox/resmi. ID/A = Telkomsel. FE/A = Indosat. Hindari kode MY/A atau ZP/A (Malaysia/luar negeri).', en: 'Settings → General → About → Model Number. Tap once to see full code. PA/A or LL/A = iBox/official. ID/A = Telkomsel. FE/A = Indosat. Avoid MY/A or ZP/A (overseas).' },
+        example: { id: 'Contoh PASS: Kode model "MPHE3PA/A" → PA/A artinya unit resmi Indonesia iBox. Kode "MPHE3ID/A" → ID/A artinya unit Telkomsel.', en: 'Example PASS: Model code "MPHE3PA/A" → PA/A means official iBox Indonesia. "MPHE3ID/A" → ID/A means Telkomsel unit.' },
+        tag: 'warn', hasLinks: false
       },
       {
         id: 'p1_imei_match',
-        title: { id: 'Cocokkan IMEI fisik vs digital', en: 'Match physical IMEI vs digital' },
-        desc: { id: 'Dial *#06# → bandingkan dengan IMEI di body belakang, SIM tray, dan dus. Ketiganya harus sama persis.', en: 'Dial *#06# → compare with IMEI on back, SIM tray, and box. All three must match exactly.' },
-        tag: 'critical'
+        title: { id: 'Cocokkan IMEI fisik vs digital vs dus', en: 'Match physical IMEI vs digital vs box' },
+        desc: { id: 'Dial *#06# → bandingkan dengan IMEI di bodi belakang (bawah kamera), SIM tray, dan dus/kardus. Ketiganya harus sama persis. Beda 1 angka pun = tolak.', en: 'Dial *#06# → compare with IMEI on back body (under camera), SIM tray, and box. All three must match exactly. Even 1 digit difference = reject.' },
+        example: { id: 'Contoh PASS: *#06# menampilkan 353066060123456. IMEI di bodi: 353066060123456. SIM tray: 353066060123456. Ketiga sama ✓', en: 'Example PASS: *#06# shows 353066060123456. IMEI on body: 353066060123456. SIM tray: 353066060123456. All three match ✓' },
+        tag: 'critical', hasLinks: false
       },
       {
         id: 'p1_unit_type',
-        title: { id: 'Cek tipe unit (M/F/N)', en: 'Check unit type (M/F/N)' },
-        desc: { id: 'Huruf pertama kode model: M = retail baru ✅, F = refurbished Apple, N = replacement Apple.', en: 'First letter of model code: M = new retail ✅, F = Apple refurbished, N = Apple replacement.' },
-        tag: 'info'
+        title: { id: 'Cek tipe unit (M / F / N)', en: 'Check unit type (M / F / N)' },
+        desc: { id: 'Huruf pertama kode model (sebelum nomor): M = unit retail baru ✅, F = refurbished resmi Apple ✅, N = replacement Apple ✅, semua aman. Hindari unit tanpa huruf atau kode tidak dikenal.', en: 'First letter of model code: M = new retail ✅, F = Apple official refurbished ✅, N = Apple replacement ✅, all safe.' },
+        example: { id: 'Contoh PASS: Kode "MPHE3PA/A" → huruf pertama M = unit retail baru. "FQ3D2LL/A" → F = refurbished Apple resmi.', en: 'Example PASS: Code "MPHE3PA/A" → first letter M = new retail unit. "FQ3D2LL/A" → F = official Apple refurbished.' },
+        tag: 'info', hasLinks: false
       },
       {
         id: 'p1_forwarding',
-        title: { id: 'Cek call forwarding', en: 'Check call forwarding' },
-        desc: { id: 'Dial *#21#, *#61#, *#67# satu per satu. Harus menampilkan "Not Forwarded". Nomor asing = red flag.', en: 'Dial *#21#, *#61#, *#67# one by one. Should show "Not Forwarded". Unknown number = red flag.' },
-        tag: 'warn'
+        title: { id: 'Cek call forwarding tersembunyi', en: 'Check hidden call forwarding' },
+        desc: { id: 'Buka aplikasi Telepon → dial *#21# lalu tekan call. Harus muncul "Not Forwarded". Ulangi untuk *#61# dan *#67#. Jika ada nomor asing = phone sudah diforward ke orang lain = red flag serius.', en: 'Open Phone app → dial *#21# then call. Should show "Not Forwarded". Repeat for *#61# and *#67#. If there\'s an unknown number = phone is being forwarded = serious red flag.' },
+        example: { id: 'Contoh PASS: Layar menampilkan "Unconditional Call Forwarding — Not Active" atau "Disabled" untuk semua kode.', en: 'Example PASS: Screen shows "Unconditional Call Forwarding — Not Active" or "Disabled" for all codes.' },
+        tag: 'warn', hasLinks: false
       },
     ]
   },
@@ -655,330 +1212,580 @@ const phases = [
       {
         id: 'p2_komponen',
         title: { id: 'Cek notifikasi komponen non-original', en: 'Check non-original component alerts' },
-        desc: { id: 'Pengaturan → Umum → Tentang. Scroll bawah. Cek notifikasi untuk layar, kamera, dan Face ID. Pesan "tidak dapat memverifikasi" = komponen diganti.', en: 'Settings → General → About. Scroll down. Check alerts for display, camera, Face ID. "Cannot verify" message = replaced component.' },
-        tag: 'critical'
+        desc: { id: 'Settings → Umum → Tentang → scroll ke bawah. Cek bagian Layar, Kamera (iPhone 12+), Face ID (iPhone X+). Pesan "Tidak dapat memverifikasi" atau "Unknown Part" = komponen pernah diganti dengan part tidak resmi.', en: 'Settings → General → About → scroll down. Check Display, Camera (iPhone 12+), Face ID (iPhone X+). "Cannot verify" or "Unknown Part" message = component replaced with non-genuine part.' },
+        example: { id: 'Contoh PASS: Bagian Layar menampilkan "Genuine Apple Display" atau tidak ada peringatan sama sekali.', en: 'Example PASS: Display section shows "Genuine Apple Display" or no warning appears at all.' },
+        tag: 'critical', hasLinks: false
       },
       {
         id: 'p2_baterai',
-        title: { id: 'Cek kesehatan baterai (min. 80%)', en: 'Check battery health (min. 80%)' },
-        desc: { id: 'Pengaturan → Baterai → Kesehatan & Pengisian Daya. Di bawah 80% = perlu ganti baterai (Rp500rb–1,5jt).', en: 'Settings → Battery → Battery Health & Charging. Below 80% = battery replacement needed.' },
-        tag: 'warn'
+        title: { id: 'Cek kesehatan baterai', en: 'Check battery health' },
+        desc: { id: 'Settings → Baterai → Kesehatan & Pengisian Daya. Di bawah 80% = perlu ganti baterai segera (biaya Rp 500rb–1,5jt tergantung model). Di bawah 70% = kondisi sangat buruk.', en: 'Settings → Battery → Battery Health & Charging. Below 80% = need battery replacement soon. Below 70% = very poor condition.' },
+        example: { id: 'Contoh PASS: Kapasitas baterai 87% → masih bagus. 91% → sangat bagus. Muncul "Peak Performance Capability" = normal.', en: 'Example PASS: Battery capacity 87% → still good. 91% → very good. Shows "Peak Performance Capability" = normal.' },
+        tag: 'warn', hasBattery: true
       },
       {
         id: 'p2_layar',
-        title: { id: 'Test layar & dead pixel', en: 'Test display & dead pixels' },
-        desc: { id: 'Cek warna, brightness, burn-in, dan dead pixel. Buka foto putih polos untuk cek lebih mudah.', en: 'Check colors, brightness, burn-in, and dead pixels. Open a plain white photo for easier detection.' },
-        tag: 'warn'
+        title: { id: 'Test layar — warna, brightness & dead pixel', en: 'Test display — color, brightness & dead pixels' },
+        desc: { id: 'Buka foto putih polos (Google "all white image") untuk cek dead pixel — titik gelap/warna yang tidak bisa hilang. Cek juga burn-in dengan buka foto abu-abu — bayangan ghost dari konten lama.', en: 'Open a plain white photo (Google "all white image") to check dead pixels — dark/colored dots that won\'t go away. Also check burn-in with a gray photo — ghost shadows from old content.' },
+        example: { id: 'Contoh PASS: Layar putih bersih tanpa titik gelap atau warna aneh. Brightness bisa full dan tidak ada garis/strip. Tidak ada bayangan ghost.', en: 'Example PASS: Clean white screen with no dark dots or odd colors. Brightness reaches full and no lines/strips. No ghost shadows.' },
+        tag: 'warn', hasLinks: false
       },
       {
         id: 'p2_tombol',
         title: { id: 'Test semua tombol fisik', en: 'Test all physical buttons' },
-        desc: { id: 'Volume atas/bawah, silent switch, power button — semua harus responsif dan tidak seret.', en: 'Volume up/down, silent switch, power button — all must be responsive and not stiff.' },
-        tag: 'info'
+        desc: { id: 'Tekan: Volume + (atas kiri), Volume - (bawah kiri), Ring/Silent switch (samping kiri), Power button (kanan atau atas). Semua harus responsif, tidak perlu ditekan keras, tidak seret/lengket. iPhone 15+ dan SE4 punya Action Button di kiri.', en: 'Press: Volume + (top left), Volume - (bottom left), Ring/Silent switch (left side), Power button (right or top). All must be responsive, no need to press hard, no stiff/sticky buttons. iPhone 15+ and SE4 have Action Button on left.' },
+        example: { id: 'Contoh PASS: Tekan Volume + → volume naik langsung. Silent switch klik dengan jelas dan ada getaran. Power button tidak perlu ditekan ekstra keras.', en: 'Example PASS: Press Volume + → volume increases immediately. Silent switch clicks clearly with haptic. Power button doesn\'t require extra force.' },
+        tag: 'info', hasLinks: false
       },
       {
         id: 'p2_faceid',
         title: { id: 'Test Face ID / Touch ID', en: 'Test Face ID / Touch ID' },
-        desc: { id: 'Coba langsung di tempat. Face ID / Touch ID tidak berfungsi bisa jadi indikasi komponen diganti.', en: 'Try it on the spot. Non-functioning Face ID/Touch ID may indicate replaced components.' },
-        tag: 'warn'
+        desc: { id: 'Face ID (iPhone X ke atas): coba lock screen lalu buka dengan wajah di cahaya normal. Touch ID (iPhone 8 ke bawah, SE): coba daftarkan sidik jari baru di Settings. Jika gagal bisa indikasi sensor diganti.', en: 'Face ID (iPhone X and up): lock screen then unlock with face in normal light. Touch ID (iPhone 8 and below, SE): try registering new fingerprint in Settings. Failure may indicate sensor replacement.' },
+        example: { id: 'Contoh PASS Face ID: Layar langsung terbuka saat lihat HP dalam kondisi cahaya normal tanpa perlu gerakan khusus. Contoh PASS Touch ID: Sidik jari berhasil terdaftar dan bisa unlock dalam 3 detik.', en: 'Example PASS Face ID: Screen unlocks immediately when looking at phone in normal light. Example PASS Touch ID: Fingerprint registers successfully and can unlock within 3 seconds.' },
+        tag: 'warn', hasLinks: false
       },
       {
         id: 'p2_kamera',
-        title: { id: 'Test kamera depan & belakang', en: 'Test front & rear cameras' },
-        desc: { id: 'Foto dan video, depan dan belakang. Cek fokus, warna, dan stabilisasi.', en: 'Photo and video, front and back. Check focus, colors, and stabilization.' },
-        tag: 'info'
+        title: { id: 'Test semua kamera (foto, video, zoom)', en: 'Test all cameras (photo, video, zoom)' },
+        desc: { id: 'Buka kamera → foto depan dan belakang, rekam video 30 detik, coba semua lensa (wide, ultrawide, telephoto jika ada), dan coba zoom. Cek fokus, warna natural, dan stabilisasi video.', en: 'Open camera → front and back photo, record 30s video, try all lenses (wide, ultrawide, telephoto if available), and zoom. Check focus, natural colors, and video stabilization.' },
+        example: { id: 'Contoh PASS: Foto tajam, warna natural tidak kekuningan/kehijauan, video tidak goyang saat berjalan (OIS aktif), semua lensa berganti mulus.', en: 'Example PASS: Sharp photos, natural colors not yellowish/greenish, video not shaky while walking (OIS active), all lenses switch smoothly.' },
+        tag: 'info', hasLinks: false
       },
       {
         id: 'p2_speaker',
         title: { id: 'Test speaker, mic & earpiece', en: 'Test speaker, mic & earpiece' },
-        desc: { id: 'Putar video YouTube (speaker), rekam voice note (mic), telepon seseorang (earpiece).', en: 'Play a YouTube video (speaker), record a voice note (mic), make a call (earpiece).' },
-        tag: 'info'
+        desc: { id: 'Speaker: putar YouTube/music keras-keras, tidak boleh ada suara pecah. Mic: buka Voice Memo → rekam lalu putar, suara harus jernih. Earpiece (speaker kecil di atas): telepon seseorang dan dengar lewat telinga.', en: 'Speaker: play YouTube/music loudly, no crackling sound. Mic: open Voice Memos → record then play back, sound must be clear. Earpiece (small top speaker): call someone and listen through your ear.' },
+        example: { id: 'Contoh PASS: Speaker bisa volume penuh tanpa distorsi/retak. Rekaman voice memo jernih. Suara dari earpiece terdengar jelas saat bertelepon.', en: 'Example PASS: Speaker at full volume without distortion/crackling. Voice memo recording is clear. Earpiece sound is clear during call.' },
+        tag: 'info', hasLinks: false
       },
       {
         id: 'p2_konektivitas',
-        title: { id: 'Test WiFi, Bluetooth & SIM', en: 'Test WiFi, Bluetooth & SIM' },
-        desc: { id: 'Connect ke hotspot kamu (WiFi), scan device Bluetooth, masukkan SIM kamu dan pastikan tidak ada carrier lock.', en: 'Connect to your hotspot (WiFi), scan Bluetooth devices, insert your SIM and ensure no carrier lock.' },
-        tag: 'warn'
+        title: { id: 'Test WiFi, Bluetooth, SIM & port', en: 'Test WiFi, Bluetooth, SIM & port' },
+        desc: { id: 'WiFi: connect ke hotspot HP kamu, buka YouTube — pastikan jalan lancar. Bluetooth: scan device sekitar, pastikan muncul. SIM: masukkan SIM kamu, pastikan muncul sinyal dan tidak ada "carrier lock". Port: colok charger, pastikan charging berjalan.', en: 'WiFi: connect to your hotspot, open YouTube — ensure it runs smoothly. Bluetooth: scan nearby devices, ensure they appear. SIM: insert your SIM, ensure signal appears and no "carrier lock". Port: plug in charger, ensure charging works.' },
+        example: { id: 'Contoh PASS: YouTube berjalan di 4G/5G hotspot tanpa buffering. Bluetooth menemukan HP lain. SIM terbaca dan ada sinyal. Indikator charging muncul saat colok kabel.', en: 'Example PASS: YouTube runs on 4G/5G hotspot without buffering. Bluetooth finds other phones. SIM reads and shows signal. Charging indicator appears when cable plugged in.' },
+        tag: 'warn', hasLinks: false
       },
       {
         id: 'p2_fisik',
         title: { id: 'Cek kondisi fisik menyeluruh', en: 'Check overall physical condition' },
-        desc: { id: 'Sekrup bawah lecet = pernah dibuka. Cek slot SIM, layar (retak halus di pinggir), dan semua port.', en: 'Scratched bottom screws = previously opened. Check SIM slot, screen edges (hairline cracks), all ports.' },
-        tag: 'info'
+        desc: { id: 'Sekrup bawah (Pentalobe): lecet/sudah diganti = pernah dibuka. Cek slot SIM (bengkok = pernah dipaksa). Cek layar bagian pinggir untuk retak halus. Cek bodi belakang (pecah/penyok). Cek semua port.', en: 'Bottom screws (Pentalobe): scratched/replaced = previously opened. Check SIM slot (bent = forced). Check screen edges for hairline cracks. Check rear body (cracked/dented). Check all ports.' },
+        example: { id: 'Contoh PASS: Sekrup bawah masih original (tidak ada tanda obeng). SIM slot mulus. Layar mulus dari semua sisi. Tidak ada penyok atau retak di bodi.', en: 'Example PASS: Bottom screws are original (no screwdriver marks). SIM slot is smooth. Screen is perfect from all angles. No dents or cracks on body.' },
+        tag: 'info', hasLinks: false
       },
     ]
   },
   {
     id: 3,
-    title: { id: 'Fase 4 — The Final Test & Deal', en: 'Phase 4 — Final Test & Deal' },
+    title: { id: 'Fase 4 — Final Test & Deal', en: 'Phase 4 — Final Test & Deal' },
     items: [
       {
         id: 'p3_reset',
-        title: { id: '⚠️ Factory Reset di depan kamu', en: '⚠️ Factory Reset in front of you' },
-        desc: { id: 'Pengaturan → Umum → Transfer atau Reset → Hapus Semua. Setelah restart: muncul "Activate iPhone" & minta Apple ID lama = iCloud Lock = TOLAK. Layar "Hello" tanpa password = AMAN ✅', en: 'Settings → General → Transfer or Reset → Erase All. After restart: "Activate iPhone" asking old Apple ID = iCloud Lock = REJECT. "Hello" screen without password = SAFE ✅' },
-        tag: 'critical'
+        title: { id: 'Factory Reset di depan kamu — cek iCloud Lock', en: 'Factory Reset in front of you — check iCloud Lock' },
+        desc: { id: 'Settings → Umum → Transfer atau Reset iPhone → Hapus Semua Konten. Tunggu hingga restart selesai. Jika muncul layar "Activate iPhone" dan meminta Apple ID lama = iCloud Lock = TOLAK SEKETIKA. Jika langsung muncul layar "Hello" = AMAN ✅', en: 'Settings → General → Transfer or Reset iPhone → Erase All Content. Wait for restart. If "Activate iPhone" screen appears asking for old Apple ID = iCloud Lock = REJECT IMMEDIATELY. If "Hello" screen appears directly = SAFE ✅' },
+        example: { id: 'Contoh PASS: Setelah restart, muncul layar "Hello" dalam berbagai bahasa, lalu minta setup baru tanpa meminta Apple ID lama. Ini berarti iCloud sudah di-logout dengan benar.', en: 'Example PASS: After restart, "Hello" screen appears in multiple languages, then asks for new setup without requesting old Apple ID. This means iCloud was properly signed out.' },
+        tag: 'critical', hasLinks: false
       },
       {
         id: 'p3_nota',
-        title: { id: 'Minta nota jual beli', en: 'Request proof of purchase' },
-        desc: { id: 'Tulis tangan pun tidak apa-apa: nama, nomor HP, IMEI, harga, tanggal. Simpan juga semua bukti chat.', en: 'Handwritten is fine: name, phone number, IMEI, price, date. Save all chat evidence too.' },
-        tag: 'warn'
+        title: { id: 'Minta nota/bukti jual beli', en: 'Request proof of purchase' },
+        desc: { id: 'Tulis tangan atau chat WA sudah cukup sebagai bukti: nama lengkap penjual, nomor HP, IMEI, tipe iPhone, harga, dan tanggal transaksi. Simpan semua screenshot chat. Jika ada dus/box asli, minta sekalian.', en: 'Handwritten or WA chat is sufficient as proof: seller full name, phone number, IMEI, iPhone type, price, and transaction date. Save all chat screenshots. If original box available, request it.' },
+        example: { id: 'Contoh PASS: Chat WA berisi konfirmasi "Jual iPhone 13 128GB IMEI 353066xxx seharga Rp 5.000.000 kepada [nama kamu] pada 27/03/2026". Screenshot dan simpan.', en: 'Example PASS: WA chat contains confirmation "Selling iPhone 13 128GB IMEI 353066xxx for Rp 5,000,000 to [your name] on 27/03/2026". Screenshot and save.' },
+        tag: 'warn', hasLinks: false
       },
       {
         id: 'p3_bayar',
         title: { id: 'Semua lolos → baru bayar', en: 'Everything passes → then pay' },
-        desc: { id: 'Jangan serahkan uang sebelum semua poin di atas selesai. Penjual jujur tidak akan keberatan satupun langkah ini.', en: 'Don\'t hand over money until all points above are done. Honest sellers won\'t object to any of these steps.' },
-        tag: 'critical'
+        desc: { id: 'Jangan serahkan uang sebelum semua fase selesai. Penjual yang jujur tidak akan keberatan dengan satu pun langkah di atas. Jika penjual terburu-buru, tidak mau di-reset, atau tidak mau diperiksa = tolak.', en: 'Don\'t hand over money until all phases complete. An honest seller won\'t object to any step above. If seller rushes, refuses reset, or doesn\'t allow inspection = reject.' },
+        example: { id: 'Satu-satunya "PASS" di sini adalah ketika semua item di atas sudah berstatus PASS dan kamu sudah siap membayar dengan yakin.', en: 'The only "PASS" here is when all items above are PASS status and you are confident to pay.' },
+        tag: 'critical', hasLinks: false
       },
     ]
   }
 ];
 
-const imeiLinks = [
-  { label: 'Kemenperin', url: 'https://imei.kemenperin.go.id', emoji: '🇮🇩' },
-  { label: 'imei.info', url: 'https://www.imei.info', emoji: '🔍' },
-  { label: 'imeipro.info', url: 'https://imeipro.info', emoji: '🔒' },
-  { label: 'Apple Coverage', url: 'https://checkcoverage.apple.com', emoji: '🍎' },
-];
-
 const state = {};
-phases.forEach(p => p.items.forEach(item => state[item.id] = false));
+phases.forEach(p => p.items.forEach(item => { state[item.id] = null; }));
+const notes = {};
+phases.forEach(p => p.items.forEach(item => { notes[item.id] = ''; }));
+
+let startTime = null;
 
 function setLang(l) {
-  lang.current = l;
+  L.cur = l;
   document.getElementById('btn-id').classList.toggle('active', l === 'id');
   document.getElementById('btn-en').classList.toggle('active', l === 'en');
-  document.getElementById('header-sub').textContent = translations.headerSub[l];
-  document.getElementById('footer-text').textContent = translations.footerText[l];
-  document.getElementById('btn-wa-text').textContent = translations.waText[l];
-  document.getElementById('btn-copy-text').textContent = translations.copyText[l];
-  document.getElementById('btn-reset-text').textContent = translations.resetText[l];
-
-  // Update phase pills
-  document.querySelectorAll('.phase-pill').forEach(pill => {
-    pill.textContent = pill.getAttribute(`data-${l}-text`);
-  });
-
-  // Update imei label
-  const imeiLabel = document.querySelector('.imei-label');
-  if (imeiLabel) imeiLabel.textContent = translations.imeiLabel[l];
-
-  // Re-render phases
+  applyTranslations();
   renderPhases();
-  updateProgress();
-  updateVerdict();
+  updateAll();
+  saveState();
 }
 
-function toggleItem(id) {
-  state[id] = !state[id];
-  const el = document.querySelector(`[data-id="${id}"]`);
-  if (el) {
-    el.classList.toggle('checked', state[id]);
-    if (state[id]) {
-      el.classList.add('just-checked');
-      setTimeout(() => el.classList.remove('just-checked'), 300);
-    }
+function applyTranslations() {
+  const l = L.cur;
+  document.getElementById('hero-title').textContent = T.heroTitle[l];
+  document.getElementById('hero-sub').textContent = T.heroSub[l];
+  document.getElementById('seller-title').innerHTML = T.sellerTitle[l] + ' <span style="font-size:11px;font-weight:400;color:var(--text3)">(' + (l==='id'?'opsional':'optional') + ')</span>';
+  document.getElementById('model-label').textContent = T.modelLabel[l];
+  document.getElementById('lbl-name').textContent = T.lblName[l];
+  document.getElementById('lbl-phone').textContent = T.lblPhone[l];
+  document.getElementById('lbl-platform').textContent = T.lblPlatform[l];
+  document.getElementById('lbl-price').textContent = T.lblPrice[l];
+  document.getElementById('lbl-imei-input').textContent = T.lblImei[l];
+  document.getElementById('price-label').textContent = T.priceLabel[l];
+  document.getElementById('stat-pass-lbl').textContent = T.statPassLbl[l];
+  document.getElementById('stat-fail-lbl').textContent = T.statFailLbl[l];
+  document.getElementById('stat-skip-lbl').textContent = T.statSkipLbl[l];
+  document.getElementById('btn-wa-lbl').textContent = T.btnWa[l];
+  document.getElementById('btn-copy-lbl').textContent = T.btnCopy[l];
+  document.getElementById('btn-pdf-lbl').textContent = T.btnPdf[l];
+  document.getElementById('btn-reset-lbl').textContent = T.btnReset[l];
+  document.getElementById('footer-text').textContent = T.footerText[l];
+}
+
+function toggleSeller() {
+  const f = document.getElementById('seller-fields');
+  const b = document.getElementById('seller-badge');
+  const vis = f.style.display !== 'none';
+  f.style.display = vis ? 'none' : 'block';
+  b.textContent = vis ? (L.cur==='id'?'Isi sekarang ▾':'Fill now ▾') : (L.cur==='id'?'Sembunyikan ▴':'Hide ▴');
+}
+
+function saveSeller() {
+  const data = {
+    name: document.getElementById('seller-name').value,
+    phone: document.getElementById('seller-phone').value,
+    platform: document.getElementById('seller-platform').value,
+    price: document.getElementById('seller-price').value,
+    imei: document.getElementById('seller-imei').value,
+  };
+  localStorage.setItem('icheck_seller', JSON.stringify(data));
+}
+
+function loadSeller() {
+  try {
+    const d = JSON.parse(localStorage.getItem('icheck_seller') || '{}');
+    if (d.name) document.getElementById('seller-name').value = d.name;
+    if (d.phone) document.getElementById('seller-phone').value = d.phone;
+    if (d.platform) document.getElementById('seller-platform').value = d.platform;
+    if (d.price) document.getElementById('seller-price').value = d.price;
+    if (d.imei) document.getElementById('seller-imei').value = d.imei;
+  } catch(e) {}
+}
+
+function onModelChange() {
+  const m = document.getElementById('model-select').value;
+  const noteEl = document.getElementById('model-note');
+  if (m && modelNotes[m]) {
+    noteEl.textContent = modelNotes[m][L.cur];
+    noteEl.style.display = 'block';
+  } else {
+    noteEl.style.display = 'none';
   }
-  updateProgress();
-  updateVerdict();
-  updatePhasePills();
+  localStorage.setItem('icheck_model', m);
+  calcPrice();
+  renderPhases();
+  updateAll();
 }
 
-function togglePhase(phaseId) {
-  const el = document.getElementById(`phase-${phaseId}`);
-  if (el) el.classList.toggle('open');
+function calcPrice() {
+  const m = document.getElementById('model-select').value;
+  const askStr = document.getElementById('seller-price').value;
+  const ask = parseInt(askStr);
+  const resultEl = document.getElementById('price-result');
+  const l = L.cur;
+
+  if (!m || !priceRanges[m]) {
+    resultEl.innerHTML = l==='id' ? 'Pilih tipe iPhone untuk melihat saran harga.' : 'Select an iPhone model to see price suggestion.';
+    resultEl.className = 'price-result show';
+    return;
+  }
+
+  const [low, high] = priceRanges[m];
+  const fmt = n => 'Rp ' + (n/1000000).toFixed(1).replace('.', ',') + ' jt';
+  let html = `<strong>${l==='id'?'Harga wajar':'Fair price'}:</strong> ${fmt(low)} – ${fmt(high)}<br>`;
+
+  if (ask && !isNaN(ask)) {
+    const mid = (low + high) / 2;
+    if (ask < low * 0.8) {
+      html += `<span class="price-high">${l==='id'?'⚠️ Harga terlalu murah! Waspadai kemungkinan masalah serius.':'⚠️ Price too low! Be wary of serious issues.'}</span>`;
+    } else if (ask <= high * 1.05) {
+      html += `<span class="price-ok">${l==='id'?'✓ Harga masuk range wajar.':'✓ Price is within fair range.'}</span>`;
+    } else {
+      html += `<span class="price-high">${l==='id'?'Harga di atas pasaran. Coba nego lebih rendah.':'Price above market. Try negotiating lower.'}</span>`;
+    }
+  } else {
+    html += `<span style="color:var(--text3)">${l==='id'?'Isi harga penjual di atas untuk perbandingan.':'Enter seller price above for comparison.'}</span>`;
+  }
+
+  resultEl.innerHTML = html;
+  resultEl.className = 'price-result show';
 }
 
-function getTotalItems() {
-  return Object.keys(state).length;
+function setItemState(id, val) {
+  if (!startTime) startTime = new Date();
+  state[id] = val;
+  updateAll();
+  saveState();
+  renderItemState(id);
+  updatePhaseState();
 }
 
-function getCheckedCount() {
-  return Object.values(state).filter(Boolean).length;
+function renderItemState(id) {
+  const item = document.querySelector(`[data-id="${id}"]`);
+  if (!item) return;
+  item.classList.remove('state-pass','state-fail');
+  if (state[id] === 'pass') item.classList.add('state-pass');
+  if (state[id] === 'fail') item.classList.add('state-fail');
+
+  const bp = item.querySelector('.btn-pass');
+  const bf = item.querySelector('.btn-fail');
+  if (bp) bp.classList.toggle('active', state[id]==='pass');
+  if (bf) bf.classList.toggle('active', state[id]==='fail');
+
+  const nw = item.querySelector('.note-input-wrap');
+  if (nw) nw.classList.toggle('show', state[id]==='fail');
 }
 
-function getCriticalItems() {
-  const criticals = [];
-  phases.forEach(p => p.items.forEach(item => {
-    if (item.tag === 'critical') criticals.push(item.id);
-  }));
-  return criticals;
-}
-
-function updateProgress() {
-  const total = getTotalItems();
-  const checked = getCheckedCount();
-  const pct = total ? (checked / total) * 100 : 0;
-
-  document.getElementById('checked-count').textContent = checked;
-  document.getElementById('total-count').textContent = total;
-  document.getElementById('progress-fill').style.width = pct + '%';
-}
-
-function updatePhasePills() {
-  phases.forEach((phase, i) => {
-    const pill = document.getElementById(`pill-${i}`);
-    if (!pill) return;
-    const total = phase.items.length;
-    const checked = phase.items.filter(item => state[item.id]).length;
-    pill.classList.remove('done', 'active');
-    if (checked === total) pill.classList.add('done');
-    else if (checked > 0) pill.classList.add('active');
+function updatePhaseState() {
+  phases.forEach(phase => {
+    const el = document.getElementById(`phase-${phase.id}`);
+    if (!el) return;
+    const ids = phase.items.map(i => i.id);
+    const hasFail = ids.some(id => state[id]==='fail');
+    const allDone = ids.every(id => state[id]==='pass');
+    el.classList.toggle('phase-complete', allDone);
+    el.classList.toggle('phase-has-fail', hasFail && !allDone);
+    const metaEl = el.querySelector('.phase-meta');
+    if (metaEl) {
+      const passCount = ids.filter(id => state[id]==='pass').length;
+      metaEl.textContent = `${passCount}/${ids.length} ${L.cur==='id'?'pass':'pass'}`;
+    }
+    const numEl = el.querySelector('.phase-num');
+    if (numEl) {
+      if (allDone) numEl.textContent = '✓';
+      else if (hasFail) numEl.textContent = '!';
+      else numEl.textContent = phase.id + 1;
+    }
   });
 }
 
-function updateVerdict() {
-  const total = getTotalItems();
-  const checked = getCheckedCount();
-  const criticals = getCriticalItems();
-  const allCriticalDone = criticals.every(id => state[id]);
-  const card = document.getElementById('verdict-card');
-  const title = document.getElementById('verdict-title');
-  const desc = document.getElementById('verdict-desc');
-  const emoji = document.getElementById('verdict-emoji');
-  const l = lang.current;
+function updateAll() {
+  const allIds = phases.flatMap(p => p.items.map(i => i.id));
+  const total = allIds.length;
+  const passCount = allIds.filter(id => state[id]==='pass').length;
+  const failCount = allIds.filter(id => state[id]==='fail').length;
+  const skipCount = total - passCount - failCount;
+  const answered = passCount + failCount;
+  const pct = total ? (answered / total) * 100 : 0;
 
-  if (checked === 0) { card.classList.remove('show'); return; }
+  document.getElementById('sticky-fill').style.width = pct + '%';
+  document.getElementById('sc-pass').textContent = passCount + (L.cur==='id'?' pass':' pass');
+  document.getElementById('sc-fail').textContent = failCount + ' not pass';
+  document.getElementById('sc-total').textContent = '/ ' + total + ' item';
 
-  card.classList.add('show');
-  card.className = 'verdict-card show';
+  document.getElementById('stat-pass-num').textContent = passCount;
+  document.getElementById('stat-fail-num').textContent = failCount;
+  document.getElementById('stat-skip-num').textContent = skipCount;
 
-  if (checked === total && allCriticalDone) {
-    card.classList.add('verdict-layak');
-    emoji.textContent = '✅';
-    title.textContent = translations.verdictLayakTitle[l];
-    desc.textContent = translations.verdictLayakDesc[l];
-  } else if (!allCriticalDone && checked > total * 0.5) {
-    card.classList.add('verdict-tolak');
-    emoji.textContent = '🚫';
-    title.textContent = translations.verdictTolakTitle[l];
-    desc.textContent = translations.verdictTolakDesc[l];
-  } else {
-    card.classList.add('verdict-hati');
-    emoji.textContent = '⚠️';
-    title.textContent = translations.verdictHatiTitle[l];
-    desc.textContent = translations.verdictHatiDesc[l];
+  // Score calculation
+  const criticals = phases.flatMap(p => p.items.filter(i => i.tag==='critical').map(i => i.id));
+  const warns = phases.flatMap(p => p.items.filter(i => i.tag==='warn').map(i => i.id));
+  let score = 0;
+  allIds.forEach(id => {
+    if (state[id]==='pass') {
+      if (criticals.includes(id)) score += 10;
+      else if (warns.includes(id)) score += 5;
+      else score += 3;
+    }
+  });
+  const maxScore = criticals.length * 10 + warns.length * 5 + (allIds.length - criticals.length - warns.length) * 3;
+  const normalizedScore = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
+
+  document.getElementById('sticky-score').textContent = answered > 0 ? normalizedScore : '—';
+  document.getElementById('score-num').textContent = normalizedScore;
+
+  const sc = document.getElementById('score-card');
+  if (answered === 0) {
+    sc.classList.remove('show');
+    return;
   }
+  sc.classList.add('show');
+
+  const critFail = criticals.some(id => state[id]==='fail');
+  const scoreCircle = document.getElementById('score-circle');
+  const scoreVerdict = document.getElementById('score-verdict');
+  const scoreDesc = document.getElementById('score-desc');
+  const l = L.cur;
+
+  scoreCircle.className = 'score-circle';
+  if (critFail || normalizedScore < 50) {
+    scoreCircle.classList.add('score-tolak');
+    scoreVerdict.textContent = T.verdictTolak[l];
+    scoreDesc.textContent = T.descTolak[l];
+  } else if (normalizedScore >= 80 && !critFail && skipCount === 0) {
+    scoreCircle.classList.add('score-layak');
+    scoreVerdict.textContent = T.verdictLayak[l];
+    scoreDesc.textContent = T.descLayak[l];
+  } else {
+    scoreCircle.classList.add('score-hati');
+    scoreVerdict.textContent = T.verdictHati[l];
+    scoreDesc.textContent = T.descHati[l];
+  }
+
+  // Timestamp
+  if (startTime) {
+    const ts = startTime.toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric'}) + ', ' +
+               startTime.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'}) + ' WIB';
+    document.getElementById('timestamp-bar').textContent = (l==='id'?'Dicek pada: ':'Checked on: ') + ts;
+  }
+
+  calcPrice();
+}
+
+function saveState() {
+  localStorage.setItem('icheck_state', JSON.stringify(state));
+  localStorage.setItem('icheck_notes', JSON.stringify(notes));
+  localStorage.setItem('icheck_lang', L.cur);
+  localStorage.setItem('icheck_start', startTime ? startTime.toISOString() : '');
+}
+
+function loadState() {
+  try {
+    const s = JSON.parse(localStorage.getItem('icheck_state') || '{}');
+    Object.keys(s).forEach(k => { if (k in state) state[k] = s[k]; });
+    const n = JSON.parse(localStorage.getItem('icheck_notes') || '{}');
+    Object.keys(n).forEach(k => { if (k in notes) notes[k] = n[k]; });
+    const savedLang = localStorage.getItem('icheck_lang');
+    if (savedLang) L.cur = savedLang;
+    const savedStart = localStorage.getItem('icheck_start');
+    if (savedStart) startTime = new Date(savedStart);
+    const savedModel = localStorage.getItem('icheck_model');
+    if (savedModel) {
+      document.getElementById('model-select').value = savedModel;
+      onModelChange();
+    }
+  } catch(e) {}
 }
 
 function buildResult() {
-  const l = lang.current;
-  const checked = getCheckedCount();
-  const total = getTotalItems();
-  const pct = Math.round((checked / total) * 100);
-  let text = l === 'id'
-    ? `📱 *iCheck — Hasil Cek iPhone Second*\n\nProgress: ${checked}/${total} (${pct}%)\n\n`
-    : `📱 *iCheck — Used iPhone Check Result*\n\nProgress: ${checked}/${total} (${pct}%)\n\n`;
+  const l = L.cur;
+  const allIds = phases.flatMap(p => p.items.map(i => i.id));
+  const passCount = allIds.filter(id => state[id]==='pass').length;
+  const failCount = allIds.filter(id => state[id]==='fail').length;
+  const total = allIds.length;
+
+  const criticals = phases.flatMap(p => p.items.filter(i => i.tag==='critical').map(i => i.id));
+  const warns = phases.flatMap(p => p.items.filter(i => i.tag==='warn').map(i => i.id));
+  let score = 0;
+  allIds.forEach(id => {
+    if (state[id]==='pass') {
+      if (criticals.includes(id)) score += 10;
+      else if (warns.includes(id)) score += 5;
+      else score += 3;
+    }
+  });
+  const maxScore = criticals.length * 10 + warns.length * 5 + (allIds.length - criticals.length - warns.length) * 3;
+  const normalizedScore = maxScore > 0 ? Math.round((score / maxScore) * 100) : 0;
+
+  const sellerName = document.getElementById('seller-name').value;
+  const sellerPhone = document.getElementById('seller-phone').value;
+  const sellerImei = document.getElementById('seller-imei').value;
+  const modelSel = document.getElementById('model-select');
+  const modelText = modelSel.options[modelSel.selectedIndex]?.text || '';
+  const ts = startTime ? startTime.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}) + ', ' + startTime.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}) + ' WIB' : '-';
+
+  let txt = l==='id'
+    ? `📱 *iCheck — Hasil Cek iPhone Second*\n\n`
+    : `📱 *iCheck — Used iPhone Check Result*\n\n`;
+
+  if (modelText && modelText !== '— Pilih tipe —') txt += `*Model:* ${modelText}\n`;
+  if (sellerImei) txt += `*IMEI:* ${sellerImei}\n`;
+  if (sellerName) txt += `*Penjual:* ${sellerName}`;
+  if (sellerPhone) txt += ` (${sellerPhone})`;
+  if (sellerName || sellerPhone) txt += '\n';
+  txt += `*Skor:* ${normalizedScore}/100 | ${passCount} pass · ${failCount} not pass · ${total-passCount-failCount} skip\n`;
+  txt += `*Waktu cek:* ${ts}\n\n`;
 
   phases.forEach(p => {
-    text += `*${p.title[l]}*\n`;
+    txt += `*${p.title[l]}*\n`;
     p.items.forEach(item => {
-      const icon = state[item.id] ? '✅' : '⬜';
-      text += `${icon} ${item.title[l]}\n`;
+      const s = state[item.id];
+      const icon = s==='pass' ? '✅' : s==='fail' ? '❌' : '⬜';
+      txt += `${icon} ${item.title[l]}`;
+      if (s==='fail' && notes[item.id]) txt += `\n   📝 ${notes[item.id]}`;
+      txt += '\n';
     });
-    text += '\n';
+    txt += '\n';
   });
 
-  text += l === 'id'
-    ? '_Dibuat dengan iCheck — panduan beli iPhone second_'
-    : '_Made with iCheck — used iPhone buying guide_';
-  return text;
+  txt += l==='id' ? '_Dibuat dengan iCheck_' : '_Made with iCheck_';
+  return txt;
 }
 
 function shareWA() {
-  const text = encodeURIComponent(buildResult());
-  window.open(`https://wa.me/?text=${text}`, '_blank');
+  window.open('https://wa.me/?text=' + encodeURIComponent(buildResult()), '_blank');
 }
 
 function copyResult() {
   navigator.clipboard.writeText(buildResult()).then(() => {
-    const btn = document.getElementById('btn-copy-btn');
-    const span = document.getElementById('btn-copy-text');
-    const orig = span.textContent;
-    span.textContent = lang.current === 'id' ? 'Tersalin!' : 'Copied!';
-    btn.style.borderColor = 'var(--accent)';
-    btn.style.color = 'var(--accent)';
-    setTimeout(() => {
-      span.textContent = orig;
-      btn.style.borderColor = '';
-      btn.style.color = '';
-    }, 2000);
+    const btn = document.getElementById('btn-copy-lbl');
+    btn.textContent = L.cur==='id' ? 'Tersalin!' : 'Copied!';
+    setTimeout(() => { btn.textContent = T.btnCopy[L.cur]; }, 2000);
   });
 }
 
 function resetAll() {
-  Object.keys(state).forEach(k => state[k] = false);
-  document.querySelectorAll('.check-item').forEach(el => el.classList.remove('checked'));
-  document.querySelectorAll('.phase-pill').forEach(el => el.classList.remove('done', 'active'));
-  document.getElementById('verdict-card').classList.remove('show');
-  updateProgress();
+  if (!confirm(L.cur==='id' ? 'Reset semua progress?' : 'Reset all progress?')) return;
+  phases.forEach(p => p.items.forEach(item => { state[item.id] = null; notes[item.id] = ''; }));
+  startTime = null;
+  localStorage.removeItem('icheck_state');
+  localStorage.removeItem('icheck_notes');
+  localStorage.removeItem('icheck_start');
+  renderPhases();
+  updateAll();
+  updatePhaseState();
+  document.getElementById('score-card').classList.remove('show');
+  document.getElementById('sticky-fill').style.width = '0%';
+  document.getElementById('sticky-score').textContent = '—';
+}
+
+function togglePhase(id) {
+  const el = document.getElementById(`phase-${id}`);
+  if (el) el.classList.toggle('open');
+}
+
+function getBattResult(pct) {
+  const l = L.cur;
+  if (pct >= 85) return { cls: 'batt-great', txt: `${pct}% — ${T.battGreat[l]}` };
+  if (pct >= 80) return { cls: 'batt-good', txt: `${pct}% — ${T.battGood[l]}` };
+  if (pct >= 70) return { cls: 'batt-ok', txt: `${pct}% — ${T.battOk[l]}` };
+  return { cls: 'batt-bad', txt: `${pct}% — ${T.battBad[l]}` };
+}
+
+function onBattInput(id, val) {
+  const pct = parseInt(val);
+  const resEl = document.getElementById(`batt-result-${id}`);
+  if (!resEl) return;
+  if (isNaN(pct) || pct <= 0 || pct > 100) { resEl.textContent = ''; return; }
+  const r = getBattResult(pct);
+  resEl.className = `battery-result ${r.cls}`;
+  resEl.textContent = r.txt;
 }
 
 function renderPhases() {
-  const l = lang.current;
+  const l = L.cur;
   const container = document.getElementById('phases-container');
   container.innerHTML = '';
+  const m = document.getElementById('model-select').value;
+  const isFace = hasFaceID.includes(m);
+  const isTouch = hasTouchID.includes(m);
+  const isUSBC = hasUSBC.includes(m);
 
   phases.forEach(phase => {
-    const phaseItems = phase.items;
-    const checkedInPhase = phaseItems.filter(item => state[item.id]).length;
-    const isComplete = checkedInPhase === phaseItems.length;
+    const el = document.createElement('div');
+    const ids = phase.items.map(i => i.id);
+    const hasFail = ids.some(id => state[id]==='fail');
+    const allDone = ids.every(id => state[id]==='pass');
+    const passCount = ids.filter(id => state[id]==='pass').length;
 
-    const phaseEl = document.createElement('div');
-    phaseEl.className = `phase${isComplete ? ' phase-complete' : ''} open`;
-    phaseEl.id = `phase-${phase.id}`;
+    el.className = `phase open${allDone?' phase-complete':''}${hasFail&&!allDone?' phase-has-fail':''}`;
+    el.id = `phase-${phase.id}`;
 
-    const tagColors = {
-      critical: `<span class="check-tag tag-critical">${l === 'id' ? 'KRITIS' : 'CRITICAL'}</span>`,
-      warn: `<span class="check-tag tag-warn">${l === 'id' ? 'PERHATIAN' : 'WARNING'}</span>`,
+    const tagHtml = {
+      critical: `<span class="check-tag tag-critical">${l==='id'?'KRITIS':'CRITICAL'}</span>`,
+      warn: `<span class="check-tag tag-warn">${l==='id'?'PERHATIAN':'WARNING'}</span>`,
       info: `<span class="check-tag tag-info">INFO</span>`,
     };
 
     let itemsHTML = '';
-    phaseItems.forEach(item => {
-      const isChecked = state[item.id];
+    phase.items.forEach(item => {
+      const s = state[item.id];
+      let desc = item.desc[l];
+
+      // Model-specific adjustments
+      if (item.id === 'p2_faceid') {
+        if (m && isFace) desc = l==='id'
+          ? 'Kunci layar, lalu lihat langsung ke HP di pencahayaan normal. Face ID harus langsung membuka layar dalam 1-2 detik. Coba dari beberapa sudut.'
+          : 'Lock screen, then look directly at phone in normal lighting. Face ID should unlock within 1-2 seconds. Try from several angles.';
+        else if (m && isTouch) desc = l==='id'
+          ? 'Pergi ke Settings → Face ID & Passcode → Add a Fingerprint. Daftarkan sidik jari baru dan pastikan berhasil terdaftar. Coba buka layar dengan sidik jari tersebut.'
+          : 'Go to Settings → Touch ID & Passcode → Add a Fingerprint. Register a new fingerprint and ensure it registers. Try unlocking with that fingerprint.';
+      }
+
+      if (item.id === 'p2_konektivitas' && m && isUSBC) {
+        desc += l==='id' ? ' Port USB-C: pastikan kabel masuk mulus dan charging berjalan normal.' : ' USB-C port: ensure cable fits smoothly and charging works normally.';
+      }
+
+      const noteVal = notes[item.id] || '';
       itemsHTML += `
-        <div class="check-item${isChecked ? ' checked' : ''}" data-id="${item.id}" onclick="toggleItem('${item.id}')">
-          <div class="check-box"><span class="check-icon">✓</span></div>
-          <div class="check-content">
+        <div class="check-item${s==='pass'?' state-pass':s==='fail'?' state-fail':''}" data-id="${item.id}">
+          <div class="check-top">
             <div class="check-title">${item.title[l]}</div>
-            <div class="check-desc">${item.desc[l]}</div>
+            ${tagHtml[item.tag]||''}
           </div>
-          ${tagColors[item.tag] || ''}
-        </div>
-      `;
+          <div class="check-desc">${desc}</div>
+          ${item.example ? `<div class="check-example"><strong>${l==='id'?'Contoh:':'Example:'}</strong> ${item.example[l]}</div>` : ''}
+          ${item.hasBattery ? `
+          <div class="battery-input-wrap">
+            <span style="font-size:12px;color:var(--text3)">${T.battLabel[l]}</span>
+            <input class="battery-input" type="number" min="1" max="100" placeholder="87" id="batt-input-${item.id}" oninput="onBattInput('${item.id}',this.value)" value="">
+            <span class="battery-result" id="batt-result-${item.id}"></span>
+          </div>` : ''}
+          <div class="check-actions">
+            <button class="btn-pass${s==='pass'?' active':''}" onclick="setItemState('${item.id}','pass')">✓ ${T.passBtn[l]}</button>
+            <button class="btn-fail${s==='fail'?' active':''}" onclick="setItemState('${item.id}','fail')">✗ ${T.failBtn[l]}</button>
+          </div>
+          <div class="note-input-wrap${s==='fail'?' show':''}">
+            <textarea class="note-input" placeholder="${T.notePlaceholder[l]}" oninput="notes['${item.id}']=this.value;saveState()">${noteVal}</textarea>
+          </div>
+        </div>`;
+
       if (item.hasLinks) {
         itemsHTML += `
           <div class="imei-section">
-            <div class="imei-label">${translations.imeiLabel[l]}</div>
+            <div class="imei-label">${T.imeiLabel[l]}</div>
             <div class="imei-links">
-              ${imeiLinks.map(link => `<a href="${link.url}" target="_blank" class="imei-link">${link.emoji} ${link.label}</a>`).join('')}
+              ${imeiLinks.map(lnk => `<a href="${lnk.url}" target="_blank" class="imei-link">${lnk.icon} ${lnk.label}</a>`).join('')}
             </div>
-          </div>
-        `;
+          </div>`;
       }
     });
 
-    phaseEl.innerHTML = `
+    el.innerHTML = `
       <div class="phase-header" onclick="togglePhase(${phase.id})">
-        <div class="phase-num">${isComplete ? '✓' : (phase.id + 1)}</div>
+        <div class="phase-num">${allDone?'✓':hasFail?'!':phase.id+1}</div>
         <div class="phase-title-wrap">
           <div class="phase-title">${phase.title[l]}</div>
-          <div class="phase-meta">${checkedInPhase}/${phaseItems.length} ${l === 'id' ? 'selesai' : 'done'}</div>
+          <div class="phase-meta">${passCount}/${phase.items.length} pass</div>
         </div>
         <div class="phase-chevron">▾</div>
       </div>
-      <div class="phase-body">${itemsHTML}</div>
-    `;
+      <div class="phase-body">${itemsHTML}</div>`;
 
-    container.appendChild(phaseEl);
+    container.appendChild(el);
   });
 }
 
-// Init
-renderPhases();
-updateProgress();
-updatePhasePills();
+// INIT
+(function init() {
+  loadSeller();
+  loadState();
+  applyTranslations();
+  renderPhases();
+  updateAll();
+  updatePhaseState();
+
+  // Restore lang toggle UI
+  document.getElementById('btn-id').classList.toggle('active', L.cur==='id');
+  document.getElementById('btn-en').classList.toggle('active', L.cur==='en');
+
+  // Restore note values
+  phases.forEach(p => p.items.forEach(item => {
+    const ta = document.querySelector(`[data-id="${item.id}"] .note-input`);
+    if (ta && notes[item.id]) ta.value = notes[item.id];
+    renderItemState(item.id);
+  }));
+})();
 </script>
 </body>
 </html>
